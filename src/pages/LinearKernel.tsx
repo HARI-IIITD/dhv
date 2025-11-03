@@ -1,26 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Play, RotateCcw, Shuffle, Info } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
 const LinearKernel = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [cParameter, setCParameter] = useState([1]);
-  const [numPoints, setNumPoints] = useState([50]);
+  const howItWorksCanvasRef = useRef<HTMLCanvasElement>(null);
   const [testIncome, setTestIncome] = useState(70000);
   const [testScore, setTestScore] = useState(650);
   const [prediction, setPrediction] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<number>(1);
 
   useEffect(() => {
-    drawVisualization();
-  }, [cParameter, numPoints]);
+    drawHowItWorks();
+  }, [currentStep]);
 
-  const drawVisualization = () => {
-    const canvas = canvasRef.current;
+  const drawHowItWorks = () => {
+    const canvas = howItWorksCanvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -29,10 +27,9 @@ const LinearKernel = () => {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Set up coordinate system
     const width = canvas.width;
     const height = canvas.height;
-    const padding = 40;
+    const padding = 50;
 
     // Draw axes
     ctx.strokeStyle = "#374151";
@@ -43,6 +40,29 @@ const LinearKernel = () => {
     ctx.moveTo(padding, height - padding);
     ctx.lineTo(padding, padding);
     ctx.stroke();
+
+    // Draw axis labels
+    ctx.fillStyle = "#374151";
+    ctx.font = "14px sans-serif";
+    ctx.fillText("Credit Score", width - padding - 80, height - padding + 20);
+    ctx.save();
+    ctx.translate(padding - 20, height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Annual Income ($)", 0, 0);
+    ctx.restore();
+
+    // Fixed data points for consistency
+    const class0Points = [
+      { x: 0.2, y: 0.15 }, { x: 0.25, y: 0.25 }, { x: 0.18, y: 0.35 },
+      { x: 0.3, y: 0.45 }, { x: 0.22, y: 0.55 }, { x: 0.28, y: 0.65 },
+      { x: 0.25, y: 0.75 }, { x: 0.2, y: 0.85 },
+    ];
+
+    const class1Points = [
+      { x: 0.7, y: 0.2 }, { x: 0.75, y: 0.3 }, { x: 0.68, y: 0.4 },
+      { x: 0.8, y: 0.5 }, { x: 0.72, y: 0.6 }, { x: 0.78, y: 0.7 },
+      { x: 0.75, y: 0.8 }, { x: 0.7, y: 0.9 },
+    ];
 
     // Draw grid
     ctx.strokeStyle = "#E5E7EB";
@@ -60,101 +80,146 @@ const LinearKernel = () => {
       ctx.stroke();
     }
 
-    // Draw colored regions
-    const gradient1 = ctx.createLinearGradient(padding, 0, width / 2, 0);
-    gradient1.addColorStop(0, "rgba(239, 68, 68, 0.15)");
-    gradient1.addColorStop(1, "rgba(239, 68, 68, 0.05)");
-    ctx.fillStyle = gradient1;
-    ctx.fillRect(padding, padding, (width - 2 * padding) / 2, height - 2 * padding);
+    // Step 1: Plot all data points
+    if (currentStep >= 1) {
+      class0Points.forEach((point) => {
+        const x = padding + point.x * (width - 2 * padding);
+        const y = padding + (1 - point.y) * (height - 2 * padding);
+        ctx.fillStyle = "#EF4444";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
-    const gradient2 = ctx.createLinearGradient(width / 2, 0, width - padding, 0);
-    gradient2.addColorStop(0, "rgba(16, 185, 129, 0.05)");
-    gradient2.addColorStop(1, "rgba(16, 185, 129, 0.15)");
-    ctx.fillStyle = gradient2;
-    ctx.fillRect(width / 2, padding, (width - 2 * padding) / 2, height - 2 * padding);
-
-    // Draw decision boundary (vertical line in middle for linear separation)
-    ctx.strokeStyle = "#1F2937";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(width / 2, padding);
-    ctx.lineTo(width / 2, height - padding);
-    ctx.stroke();
-
-    // Draw margin boundaries
-    const marginWidth = 30 / cParameter[0]; // Wider margin for smaller C
-    ctx.strokeStyle = "#6B7280";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(width / 2 - marginWidth, padding);
-    ctx.lineTo(width / 2 - marginWidth, height - padding);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(width / 2 + marginWidth, padding);
-    ctx.lineTo(width / 2 + marginWidth, height - padding);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Generate and draw data points
-    const points = numPoints[0];
-    for (let i = 0; i < points; i++) {
-      const isClass0 = i < points / 2;
-      const baseX = isClass0 ? width / 4 : (3 * width) / 4;
-      const x = baseX + (Math.random() - 0.5) * 80;
-      const y = padding + Math.random() * (height - 2 * padding);
-
-      ctx.fillStyle = isClass0 ? "#EF4444" : "#10B981";
-      ctx.beginPath();
-      ctx.arc(x, y, 5, 0, Math.PI * 2);
-      ctx.fill();
+      class1Points.forEach((point) => {
+        const x = padding + point.x * (width - 2 * padding);
+        const y = padding + (1 - point.y) * (height - 2 * padding);
+        ctx.fillStyle = "#10B981";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
 
-    // Draw support vectors (highlighted points near the boundary)
-    const supportVectors = [
-      { x: width / 2 - marginWidth - 10, y: height / 3, class: 0 },
-      { x: width / 2 - marginWidth - 10, y: (2 * height) / 3, class: 0 },
-      { x: width / 2 + marginWidth + 10, y: height / 3, class: 1 },
-      { x: width / 2 + marginWidth + 10, y: (2 * height) / 3, class: 1 },
-    ];
+    // Step 2: Show multiple potential separation lines
+    if (currentStep === 2) {
+      const lines = [
+        { x: width * 0.35 },
+        { x: width * 0.45 },
+        { x: width * 0.5 },
+        { x: width * 0.55 },
+      ];
 
-    supportVectors.forEach((sv) => {
-      ctx.strokeStyle = "#1F2937";
+      lines.forEach((line, idx) => {
+        ctx.strokeStyle = "#9CA3AF"; // All lines are candidate lines
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        const x = line.x;
+        const y1 = padding;
+        const y2 = height - padding;
+        ctx.moveTo(x, y1);
+        ctx.lineTo(x, y2);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    // Step 3: Show optimal line with margin
+    if (currentStep >= 3) {
+      // Redraw points (they may have been covered by lines in step 2)
+      class0Points.forEach((point) => {
+        const x = padding + point.x * (width - 2 * padding);
+        const y = padding + (1 - point.y) * (height - 2 * padding);
+        ctx.fillStyle = "#EF4444";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      class1Points.forEach((point) => {
+        const x = padding + point.x * (width - 2 * padding);
+        const y = padding + (1 - point.y) * (height - 2 * padding);
+        ctx.fillStyle = "#10B981";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      const boundaryX = width / 2;
+      const marginWidth = 40;
+
+      // Draw margin region background
+      const gradient1 = ctx.createLinearGradient(boundaryX - marginWidth, 0, boundaryX, 0);
+      gradient1.addColorStop(0, "rgba(239, 68, 68, 0.15)");
+      gradient1.addColorStop(1, "rgba(239, 68, 68, 0.05)");
+      ctx.fillStyle = gradient1;
+      ctx.fillRect(padding, padding, boundaryX - padding - marginWidth, height - 2 * padding);
+
+      const gradient2 = ctx.createLinearGradient(boundaryX, 0, boundaryX + marginWidth, 0);
+      gradient2.addColorStop(0, "rgba(16, 185, 129, 0.05)");
+      gradient2.addColorStop(1, "rgba(16, 185, 129, 0.15)");
+      ctx.fillStyle = gradient2;
+      ctx.fillRect(boundaryX + marginWidth, padding, width - padding - boundaryX - marginWidth, height - 2 * padding);
+
+      // Draw margin boundaries
+      ctx.strokeStyle = "#6B7280";
       ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.arc(sv.x, sv.y, 8, 0, Math.PI * 2);
+      ctx.moveTo(boundaryX - marginWidth, padding);
+      ctx.lineTo(boundaryX - marginWidth, height - padding);
       ctx.stroke();
-      ctx.fillStyle = sv.class === 0 ? "#EF4444" : "#10B981";
-      ctx.fill();
-    });
+      ctx.beginPath();
+      ctx.moveTo(boundaryX + marginWidth, padding);
+      ctx.lineTo(boundaryX + marginWidth, height - padding);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw decision boundary
+      ctx.strokeStyle = "#1F2937";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(boundaryX, padding);
+      ctx.lineTo(boundaryX, height - padding);
+      ctx.stroke();
+    }
+
+    // Step 4: Highlight support vectors
+    if (currentStep >= 4) {
+      // Support vectors are the closest points to the boundary (on margin boundaries)
+      const boundaryX = width / 2;
+      const marginWidth = 40;
+
+      // Position support vectors exactly on the margin boundaries
+      const sv0 = { x: boundaryX - marginWidth, y: padding + (1 - 0.5) * (height - 2 * padding), class: 0 };
+      const sv1 = { x: boundaryX + marginWidth, y: padding + (1 - 0.5) * (height - 2 * padding), class: 1 };
+      
+      // Also add a couple more support vectors at different y positions
+      const sv0b = { x: boundaryX - marginWidth, y: padding + (1 - 0.25) * (height - 2 * padding), class: 0 };
+      const sv1b = { x: boundaryX + marginWidth, y: padding + (1 - 0.75) * (height - 2 * padding), class: 1 };
+
+      const supportVectors = [sv0, sv1, sv0b, sv1b];
+
+      // Highlight support vectors (on margin boundaries)
+      supportVectors.forEach((sv) => {
+        ctx.strokeStyle = "#F59E0B";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(sv.x, sv.y, 10, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = sv.class === 0 ? "#EF4444" : "#10B981";
+        ctx.beginPath();
+        ctx.arc(sv.x, sv.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
 
     // Draw labels
     ctx.fillStyle = "#374151";
     ctx.font = "14px sans-serif";
-    ctx.fillText("Class 0 (Red)", padding + 10, padding + 20);
-    ctx.fillText("Class 1 (Green)", width - padding - 100, padding + 20);
-  };
-
-  const playAnimation = () => {
-    setIsAnimating(true);
-    toast.success("Animation started!");
-    setTimeout(() => {
-      setIsAnimating(false);
-      drawVisualization();
-      toast.success("Animation complete!");
-    }, 3000);
-  };
-
-  const resetVisualization = () => {
-    setCParameter([1]);
-    setNumPoints([50]);
-    setPrediction(null);
-    toast.info("Visualization reset");
-  };
-
-  const randomizeData = () => {
-    setNumPoints([Math.floor(Math.random() * 40) + 30]);
-    toast.info("Data randomized!");
+    ctx.fillText("Rejected (Red)", padding + 10, padding + 20);
+    ctx.fillText("Approved (Green)", width - padding - 120, padding + 20);
   };
 
   const checkApproval = () => {
@@ -209,249 +274,108 @@ const LinearKernel = () => {
                 Perfect for linearly separable data: spam detection, text classification, and binary decisions.
               </p>
             </Card>
-            <Card className="p-6 gradient-card hover:shadow-lg transition-all duration-300">
-              <h3 className="text-xl font-semibold mb-3">Advantages</h3>
-              <p className="text-sm text-muted-foreground">
-                Fast, efficient, interpretable, and works well in high dimensions.
+          </div>
+
+          {/* Dataset Explanation */}
+          <Card className="p-8 mb-12 gradient-card">
+            <h3 className="text-2xl font-semibold mb-4">Understanding the Dataset</h3>
+            <div className="space-y-4">
+              <p className="text-muted-foreground leading-relaxed">
+                In this demonstration, we'll use a <strong className="text-foreground">bank loan approval</strong> dataset as our example. This dataset helps us understand how Linear Kernel SVM works in a real-world scenario.
               </p>
-            </Card>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            <Card className="p-6">
-              <h3 className="text-2xl font-semibold mb-6">How It Works</h3>
-              <div className="space-y-4">
-                {[
-                  "1. Identify Data: Plot all data points in space",
-                  "2. Find Boundaries: Test multiple potential separation lines",
-                  "3. Maximize Margin: Select the line with widest margin",
-                  "4. Identify Support Vectors: Highlight closest points that define boundary",
-                ].map((step, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-300">
-                    <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold flex-shrink-0">
-                      {i + 1}
-                    </div>
-                    <p className="text-sm">{step.substring(3)}</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="text-2xl font-semibold mb-6">Real-World Uses</h3>
-              <div className="space-y-3">
-                {[
-                  { icon: "📧", title: "Email Spam Detection", desc: "Red = Spam, Green = Not Spam" },
-                  { icon: "💰", title: "Loan Approval", desc: "Based on income & credit score" },
-                  { icon: "🏥", title: "Medical Diagnosis", desc: "Risk vs Healthy patients" },
-                  { icon: "📝", title: "Text Classification", desc: "Document categorization" },
-                ].map((app, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-primary transition-colors duration-300">
-                    <span className="text-2xl">{app.icon}</span>
-                    <div>
-                      <h4 className="font-semibold text-sm">{app.title}</h4>
-                      <p className="text-xs text-muted-foreground">{app.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Visualization */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Interactive Visualization</h2>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Card className="p-6">
-                <canvas
-                  ref={canvasRef}
-                  width={600}
-                  height={600}
-                  className="w-full max-w-full border border-border rounded-lg"
-                />
-              </Card>
-            </div>
-
-            <div className="space-y-6">
-              <Card className="p-6">
-                <h3 className="font-semibold mb-4">Controls</h3>
-                <div className="space-y-6">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      C Parameter: {cParameter[0].toFixed(1)}
-                      <Button variant="ghost" size="icon" className="ml-2 h-6 w-6">
-                        <Info className="h-4 w-4" />
-                      </Button>
-                    </label>
-                    <Slider value={cParameter} onValueChange={setCParameter} min={0.1} max={10} step={0.1} className="mb-2" />
-                    <p className="text-xs text-muted-foreground">Lower = Soft margin, Higher = Hard margin</p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Number of Points: {numPoints[0]}</label>
-                    <Slider value={numPoints} onValueChange={setNumPoints} min={20} max={100} step={10} />
-                  </div>
+              <div className="grid md:grid-cols-2 gap-6 mt-6">
+                <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
+                  <h4 className="font-semibold text-success mb-2 flex items-center gap-2">
+                    <span className="text-xl">✅</span> Approved Loans
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Represented by <strong className="text-success">green points</strong> in our visualization. These are loan applications that were approved based on factors like:
+                  </p>
+                  <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                    <li>High annual income</li>
+                    <li>Good credit score</li>
+                    <li>Strong financial profile</li>
+                  </ul>
                 </div>
-              </Card>
-
-              <Card className="p-6">
-                <h3 className="font-semibold mb-4">Actions</h3>
-                <div className="space-y-3">
-                  <Button onClick={playAnimation} disabled={isAnimating} className="w-full" variant="default">
-                    <Play className="mr-2 h-4 w-4" />
-                    {isAnimating ? "Animating..." : "Play Animation"}
-                  </Button>
-                  <Button onClick={resetVisualization} className="w-full" variant="outline">
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Reset
-                  </Button>
-                  <Button onClick={randomizeData} className="w-full" variant="secondary">
-                    <Shuffle className="mr-2 h-4 w-4" />
-                    Randomize Data
-                  </Button>
+                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <h4 className="font-semibold text-destructive mb-2 flex items-center gap-2">
+                    <span className="text-xl">❌</span> Rejected Loans
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Represented by <strong className="text-destructive">red points</strong> in our visualization. These are loan applications that were rejected due to:
+                  </p>
+                  <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                    <li>Low annual income</li>
+                    <li>Poor credit score</li>
+                    <li>Weak financial profile</li>
+                  </ul>
                 </div>
-              </Card>
-
-              <Card className="p-4 bg-accent/20">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Legend:</strong> Red dots = Class 0, Green dots = Class 1, Black circles = Support Vectors, Solid line = Decision boundary, Dashed lines = Margins
+              </div>
+              <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">The Goal:</strong> Our SVM model will learn to draw a decision boundary (a straight line) that separates approved loans from rejected ones. This boundary will help the bank automatically decide whether to approve or reject future loan applications.
                 </p>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Loan Approval Scenario */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Real-World: Bank Loan Approval</h2>
-
-          <Card className="p-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-xl font-semibold mb-6">Test Yourself</h3>
-                <div className="space-y-6">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Annual Income: ${testIncome.toLocaleString()}</label>
-                    <Slider value={[testIncome]} onValueChange={(v) => setTestIncome(v[0])} min={20000} max={120000} step={5000} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Credit Score: {testScore}</label>
-                    <Slider value={[testScore]} onValueChange={(v) => setTestScore(v[0])} min={300} max={850} step={10} />
-                  </div>
-                  <Button onClick={checkApproval} className="w-full" size="lg">
-                    Check Approval Status
-                  </Button>
-
-                  {prediction && (
-                    <Card className={`p-4 ${prediction === "approved" ? "bg-success/10 border-success" : "bg-destructive/10 border-destructive"}`}>
-                      <p className="text-center font-semibold">
-                        {prediction === "approved" ? "✅ Loan Approved!" : "❌ Loan Rejected"}
-                      </p>
-                      <p className="text-xs text-center text-muted-foreground mt-2">
-                        {prediction === "approved" ? "Strong candidate with good financials" : "Consider improving credit score or income"}
-                      </p>
-                    </Card>
-                  )}
-                </div>
               </div>
+            </div>
+          </Card>
 
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Key Insights</h3>
-                <div className="space-y-3">
-                  <Card className="p-4 bg-primary/5">
-                    <p className="text-sm">
-                      <strong>Decision Boundary:</strong> The line separating approved from rejected applications
-                    </p>
-                  </Card>
-                  <Card className="p-4 bg-success/5">
-                    <p className="text-sm">
-                      <strong>Support Vectors:</strong> Edge cases—applicants right on the approval threshold
-                    </p>
-                  </Card>
-                  <Card className="p-4 bg-warning/5">
-                    <p className="text-sm">
-                      <strong>Margin:</strong> Confidence zone—wider margin = more confident decisions
-                    </p>
-                  </Card>
-                </div>
+          {/* How It Works - Visual */}
+          <Card className="p-6 mb-8">
+            <h3 className="text-2xl font-semibold mb-6">How It Works - Step by Step</h3>
+            <div className="space-y-4">
+              <div className="flex gap-2 flex-wrap mb-4">
+                {[1, 2, 3, 4].map((step) => (
+                  <Button
+                    key={step}
+                    variant={currentStep === step ? "default" : "outline"}
+                    onClick={() => setCurrentStep(step)}
+                    size="sm"
+                  >
+                    Step {step}
+                  </Button>
+                ))}
+              </div>
+              {/* Move step details here and enlarge the text */}
+              <div className="mt-2 mb-6 p-4 bg-muted/30 rounded-lg">
+                <p className="text-lg font-semibold mb-2">
+                  Step {currentStep}:
+                  {currentStep === 1 && " Plot all data points in space"}
+                  {currentStep === 2 && " Test multiple potential separation lines"}
+                  {currentStep === 3 && " Maximize margin - select the line with widest margin"}
+                  {currentStep === 4 && " Identify support vectors - highlight closest points that define boundary"}
+                </p>
+                <p className="text-base text-muted-foreground">
+                  {currentStep === 1 && "First, we visualize all our loan applications (approved in green, rejected in red) in a 2D space where one axis represents income and the other represents credit score."}
+                  {currentStep === 2 && "SVM tests different straight lines that could separate approved from rejected loans. Many lines could work, but we need to find the best one."}
+                  {currentStep === 3 && "The best line is the one that creates the widest 'safety zone' (margin) between approved and rejected applications. This gives maximum confidence in our decisions."}
+                  {currentStep === 4 && "The points closest to the decision boundary (on the margin lines) are called support vectors. These are the critical data points that define where the boundary should be drawn."}
+                </p>
+              </div>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <canvas
+                  ref={howItWorksCanvasRef}
+                  width={800}
+                  height={500}
+                  className="w-full h-auto"
+                />
               </div>
             </div>
           </Card>
         </div>
       </section>
 
-      {/* Advantages & Limitations */}
+      {/* Parameters Link Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Advantages & Limitations</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="p-8 gradient-card">
-              <h3 className="text-2xl font-semibold mb-6 text-success">✓ Advantages</h3>
-              <ul className="space-y-3">
-                {[
-                  "Fast & efficient for large datasets",
-                  "Highly interpretable results",
-                  "Works well in high dimensions",
-                  "Low risk of overfitting",
-                  "Only one parameter (C) to tune",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-success font-bold">•</span>
-                    <span className="text-sm">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-
-            <Card className="p-8 gradient-card">
-              <h3 className="text-2xl font-semibold mb-6 text-warning">⚠ Limitations</h3>
-              <ul className="space-y-3">
-                {[
-                  "Only handles linear patterns",
-                  "Struggles with overlapping classes",
-                  "Sensitive to outliers",
-                  "Cannot solve XOR-like problems",
-                  "Requires feature scaling",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-warning font-bold">•</span>
-                    <span className="text-sm">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Compare Kernels */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Compare with Other Kernels</h2>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-              { name: "Polynomial", desc: "Need curves?", link: "/polynomial-kernel", color: "kernel-polynomial" },
-              { name: "RBF", desc: "Most flexible!", link: "/rbf-kernel", color: "kernel-rbf" },
-              { name: "Sigmoid", desc: "Neural network-style?", link: "/sigmoid-kernel", color: "kernel-sigmoid" },
-            ].map((kernel, i) => (
-              <Link key={i} to={kernel.link} target="_blank">
-                <Card className="p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer group">
-                  <h3 className="text-xl font-semibold mb-2">{kernel.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{kernel.desc}</p>
-                  <div className={`text-${kernel.color} font-semibold group-hover:translate-x-2 transition-transform duration-300 flex items-center`}>
-                    Explore <ArrowLeft className="ml-2 rotate-180 w-4 h-4" />
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Explore Parameters?</h2>
+          <p className="text-xl text-muted-foreground mb-8">
+            Learn how the C parameter controls the margin and decision boundary in Linear Kernel SVM
+          </p>
+          <Link to="/linear-parameters">
+            <Button variant="hero" size="xl" className="bg-primary text-primary-foreground hover:bg-primary/90">
+              Parameters of linear <ArrowRight className="ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
     </div>

@@ -6,8 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Introduction from "./pages/Introduction";
 import Parameters from "./pages/Parameters";
 import LinearKernel from "./pages/LinearKernel";
+import LinearParameters from "./pages/LinearParameters";
 import PolynomialKernel from "./pages/PolynomialKernel";
 import RBFKernel from "./pages/RBFKernel";
+import RBFParameters from "./pages/RBFParameters";
 import SigmoidKernel from "./pages/SigmoidKernel";
 import NotFound from "./pages/NotFound";
 
@@ -23,8 +25,10 @@ const App = () => (
           <Route path="/" element={<Introduction />} />
           <Route path="/parameters" element={<Parameters />} />
           <Route path="/linear-kernel" element={<LinearKernel />} />
+          <Route path="/linear-parameters" element={<LinearParameters />} />
           <Route path="/polynomial-kernel" element={<PolynomialKernel />} />
           <Route path="/rbf-kernel" element={<RBFKernel />} />
+          <Route path="/rbf-parameters" element={<RBFParameters />} />
           <Route path="/sigmoid-kernel" element={<SigmoidKernel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
