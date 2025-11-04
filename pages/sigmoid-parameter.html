@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Sigmoid Kernel — Parameters (Gamma & r)</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:20px; color:#222 }
+  .row { display:flex; gap:24px; align-items:flex-start; }
+  .panel { max-width:640px }
+  canvas { border:1px solid #ccc; cursor:crosshair }
+  .controls { margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+  label { font-size:0.95rem }
+  .info { font-size:0.9rem; color:#333 }
+  .value { font-weight:600; margin-left:6px }
+  footer { margin-top:18px; font-size:0.85rem; color:#555 }
+</style>
+</head>
+<body>
+<h2>Sigmoid kernel — parameters explained (easy words)</h2>
+
+<div class="row">
+  <div class="panel">
+    <h3>Short definitions (simple)</h3>
+    <p><strong>Gamma (γ):</strong> Think of γ as how “local” each data point’s influence is. Bigger γ = each point affects nearby area strongly (can make a complicated boundary). Smaller γ = each point influences a wider area (smoother boundary).</p>
+    <p><strong>Constant r:</strong> r is like a bias added inside the tanh function. Changing r shifts the whole similarity output up or down. Large positive or negative r can dominate and make the dot product matter less.</p>
+
+    <h3>Practical notes</h3>
+    <ul class="info">
+      <li>Tune γ and r with cross-validation — best values depend on your data.</li>
+      <li>The Sigmoid kernel is not always positive semidefinite (it can break some theoretical SVM guarantees) but can still work in practice.</li>
+      <li>Analogy: γ is like how wide each neuron’s receptive field is; r is like a neuron's bias.</li>
+    </ul>
+
+    <footer>Formula used: K(x,y) = tanh(γ · (x · y) + r). Here x and y are 1‑D inputs so dot product = x*y. The heatmap below shows similarity for x (horizontal) vs y (vertical).</footer>
+  </div>
+
+  <div>
+    <canvas id="heatmap" width="360" height="360" title="Heatmap of K(x,y)"></canvas>
+    <div class="controls">
+      <label>Gamma γ:
+        <input id="gamma" type="range" min="-5" max="5" step="0.1" value="1">
+        <span class="value" id="gammaVal">1.0</span>
+      </label>
+
+      <label>r:
+        <input id="r" type="range" min="-5" max="5" step="0.1" value="0">
+        <span class="value" id="rVal">0.0</span>
+      </label>
+
+      <label>Range:
+        <input id="range" type="range" min="1" max="6" step="0.5" value="3">
+        <span class="value" id="rangeVal">±3</span>
+      </label>
+
+      <div style="margin-left:8px; font-size:0.9rem">
+        Hover: <span id="hoverInfo">x=0.00, y=0.00, K=0.00</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// helper: map scalar v in [-1,1] to color (blue-white-red)
+function valueToColor(v) {
+  // clamp
+  v = Math.max(-1, Math.min(1, v));
+  if (v >= 0) {
+    // white -> red
+    const t = v;
+    const r = Math.round(255 * (0.95 * t +  (1 - t))); // bias to red
+    const g = Math.round(255 * (1 - 0.9 * t));
+    const b = Math.round(255 * (1 - t));
+    return `rgb(${r},${g},${b})`;
+  } else {
+    // blue -> white
+    const t = -v;
+    const r = Math.round(255 * (1 - t));
+    const g = Math.round(255 * (1 - 0.7 * t));
+    const b = Math.round(255 * (0.9 * t + (1 - t)));
+    return `rgb(${r},${g},${b})`;
+  }
+}
+
+const canvas = document.getElementById('heatmap');
+const ctx = canvas.getContext('2d');
+const gammaSlider = document.getElementById('gamma');
+const rSlider = document.getElementById('r');
+const rangeSlider = document.getElementById('range');
+const gammaVal = document.getElementById('gammaVal');
+const rVal = document.getElementById('rVal');
+const rangeVal = document.getElementById('rangeVal');
+const hoverInfo = document.getElementById('hoverInfo');
+
+let width = canvas.width;
+let height = canvas.height;
+
+function draw() {
+  const gamma = parseFloat(gammaSlider.value);
+  const r = parseFloat(rSlider.value);
+  const rng = parseFloat(rangeSlider.value);
+  gammaVal.textContent = gamma.toFixed(1);
+  rVal.textContent = r.toFixed(1);
+  rangeVal.textContent = `±${rng}`;
+
+  const img = ctx.createImageData(width, height);
+  // x horizontal from -rng..rng, y vertical from -rng..rng
+  for (let j = 0; j < height; j++) {
+    const y = rng - (j / (height - 1)) * (2 * rng);
+    for (let i = 0; i < width; i++) {
+      const x = -rng + (i / (width - 1)) * (2 * rng);
+      const dot = x * y; // 1-D vectors -> dot product
+      const k = Math.tanh(gamma * dot + r); // kernel value in [-1,1]
+      const col = valueToColor(k);
+      // parse rgb
+      const m = i + j * width;
+      const match = col.match(/(\d+),(\d+),(\d+)/);
+      const rC = parseInt(match[1],10), gC = parseInt(match[2],10), bC = parseInt(match[3],10);
+      const idx = 4*m;
+      img.data[idx] = rC;
+      img.data[idx+1] = gC;
+      img.data[idx+2] = bC;
+      img.data[idx+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  // draw crosshair at center
+  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.moveTo(0, height/2);
+  ctx.lineTo(width, height/2);
+  ctx.moveTo(width/2, 0);
+  ctx.lineTo(width/2, height);
+  ctx.stroke();
+}
+
+canvas.addEventListener('mousemove', (ev) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = ev.clientX - rect.left;
+  const my = ev.clientY - rect.top;
+  const rng = parseFloat(rangeSlider.value);
+  const x = -rng + (mx / (width - 1)) * (2 * rng);
+  const y = rng - (my / (height - 1)) * (2 * rng);
+  const gamma = parseFloat(gammaSlider.value);
+  const r = parseFloat(rSlider.value);
+  const k = Math.tanh(gamma * (x * y) + r);
+  hoverInfo.textContent = `x=${x.toFixed(2)}, y=${y.toFixed(2)}, K=${k.toFixed(3)}`;
+});
+
+[gammaSlider, rSlider, rangeSlider].forEach(s => s.addEventListener('input', draw));
+
+// initial draw
+draw();
+</script>
+</body>
+</html>

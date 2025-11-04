@@ -3,19 +3,15 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { toast } from "sonner";
 
 const SigmoidKernel = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [gamma, setGamma] = useState([0.1]);
-  const [testBMI, setTestBMI] = useState(25);
-  const [testBP, setTestBP] = useState(120);
-  const [prediction, setPrediction] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const curvature = 0.6; // fixed curvature here; adjustable on the parameters page
 
   useEffect(() => {
     drawVisualization();
-  }, [gamma]);
+  }, [currentStep]);
 
   const drawVisualization = () => {
     const canvas = canvasRef.current;
@@ -80,47 +76,45 @@ const SigmoidKernel = () => {
       return ctx;
     };
 
-    // Fill low risk region (purple/lower-left)
-    ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
-    ctx.beginPath();
-    ctx.moveTo(padding, height - padding);
-    const curve1 = drawSigmoidCurve(padding, height - padding, width - padding, padding, gamma[0] * 2);
-    ctx.lineTo(padding, padding);
-    ctx.closePath();
-    ctx.fill();
+    // Step 2/3: softly shade regions
+    if (currentStep >= 2) {
+      ctx.fillStyle = "rgba(139, 92, 246, 0.15)";
+      ctx.beginPath();
+      ctx.moveTo(padding, height - padding);
+      drawSigmoidCurve(padding, height - padding, width - padding, padding, curvature * 2);
+      ctx.lineTo(padding, padding);
+      ctx.closePath();
+      ctx.fill();
 
-    // Fill high risk region (yellow/upper-right)
-    ctx.fillStyle = "rgba(234, 179, 8, 0.15)";
-    ctx.beginPath();
-    ctx.moveTo(width - padding, height - padding);
-    const curve2 = drawSigmoidCurve(padding, height - padding, width - padding, padding, gamma[0] * 2);
-    ctx.lineTo(width - padding, padding);
-    ctx.closePath();
-    ctx.fill();
+      ctx.fillStyle = "rgba(234, 179, 8, 0.15)";
+      ctx.beginPath();
+      ctx.moveTo(width - padding, height - padding);
+      drawSigmoidCurve(padding, height - padding, width - padding, padding, curvature * 2);
+      ctx.lineTo(width - padding, padding);
+      ctx.closePath();
+      ctx.fill();
+    }
 
-    // Draw S-shaped decision boundary
-    ctx.strokeStyle = "#1F2937";
-    ctx.lineWidth = 3;
-    drawSigmoidCurve(padding, height - padding, width - padding, padding, gamma[0] * 2);
-    ctx.stroke();
+    // Step 3: main decision boundary + margins
+    if (currentStep >= 3) {
+      ctx.strokeStyle = "#1F2937";
+      ctx.lineWidth = 3;
+      drawSigmoidCurve(padding, height - padding, width - padding, padding, curvature * 2);
+      ctx.stroke();
 
-    // Draw margin boundaries (parallel S-curves)
-    ctx.strokeStyle = "#6B7280";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 5]);
-    
-    // Upper margin
-    ctx.beginPath();
-    ctx.moveTo(padding, height - padding + 20);
-    drawSigmoidCurve(padding, height - padding + 20, width - padding, padding + 20, gamma[0] * 2);
-    ctx.stroke();
-    
-    // Lower margin
-    ctx.beginPath();
-    ctx.moveTo(padding, height - padding - 20);
-    drawSigmoidCurve(padding, height - padding - 20, width - padding, padding - 20, gamma[0] * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
+      ctx.strokeStyle = "#6B7280";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(padding, height - padding + 20);
+      drawSigmoidCurve(padding, height - padding + 20, width - padding, padding + 20, curvature * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(padding, height - padding - 20);
+      drawSigmoidCurve(padding, height - padding - 20, width - padding, padding - 20, curvature * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     // Generate low risk points (purple - lower-left)
     const lowRiskPoints = [
@@ -171,23 +165,24 @@ const SigmoidKernel = () => {
       ctx.fillText("⚠", x + 8, y + 4);
     });
 
-    // Draw support vectors
-    const supportVectors = [
-      { x: 0.5, y: 0.48, class: "low" },
-      { x: 0.52, y: 0.52, class: "high" },
-    ];
-
-    supportVectors.forEach((sv) => {
-      const x = padding + sv.x * (width - 2 * padding);
-      const y = padding + (1 - sv.y) * (height - 2 * padding);
-      ctx.strokeStyle = "#1F2937";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(x, y, 9, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.fillStyle = sv.class === "low" ? "#8B5CF6" : "#EAB308";
-      ctx.fill();
-    });
+    // Support vectors shown only in step 3
+    if (currentStep >= 3) {
+      const supportVectors = [
+        { x: 0.5, y: 0.48, cls: "low" },
+        { x: 0.52, y: 0.52, cls: "high" },
+      ];
+      supportVectors.forEach((sv) => {
+        const x = padding + sv.x * (width - 2 * padding);
+        const y = padding + (1 - sv.y) * (height - 2 * padding);
+        ctx.strokeStyle = "#1F2937";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x, y, 9, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = sv.cls === "low" ? "#8B5CF6" : "#EAB308";
+        ctx.fill();
+      });
+    }
 
     // Legend
     ctx.fillStyle = "#8B5CF6";
@@ -205,25 +200,7 @@ const SigmoidKernel = () => {
     ctx.fillText("High Risk ⚠", padding + 140, padding + 24);
   };
 
-  const checkPrediction = () => {
-    const normalizedBMI = (testBMI - 15) / 25;
-    const normalizedBP = (testBP - 90) / 90;
-    
-    // Sigmoid-style decision
-    const combined = (normalizedBMI + normalizedBP) / 2;
-    const risk = 1 / (1 + Math.exp(-gamma[0] * 10 * (combined - 0.5)));
-
-    if (risk > 0.7) {
-      setPrediction("high");
-      toast.error("🚨 High Risk - Medical attention recommended");
-    } else if (risk > 0.4) {
-      setPrediction("moderate");
-      toast("⚠ Moderate Risk - Monitor closely", { icon: "⚠️" });
-    } else {
-      setPrediction("low");
-      toast.success("✅ Low Risk - Healthy range");
-    }
-  };
+  // No per-patient prediction here; moved to parameters page
 
   return (
     <div className="min-h-screen bg-background">
@@ -247,120 +224,47 @@ const SigmoidKernel = () => {
 
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Card className="p-6 mb-6">
-                <h2 className="text-2xl font-bold mb-4">Healthcare: Disease Risk Prediction</h2>
-                <p className="text-muted-foreground mb-4">
-                  Predicting health risk based on BMI and Blood Pressure with smooth transitions
-                </p>
-                <canvas ref={canvasRef} width={600} height={600} className="w-full border border-border rounded-lg" />
-              </Card>
+          <Card className="p-6 mb-8">
+            <h2 className="text-2xl font-bold mb-2">What is the Sigmoid Kernel?</h2>
+            <p className="text-muted-foreground">
+              It draws smooth S-shaped boundaries, similar to a tiny neural network. Great when your data gradually
+              flips from “no” to “yes” across a soft threshold.
+            </p>
+          </Card>
 
-              <Card className="p-6">
-                <h3 className="font-semibold mb-4">Key Insights</h3>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Card className="p-4 bg-warning/5">
-                    <p className="text-sm">
-                      <strong>Soft Boundaries:</strong> Gradual transitions match medical reality
-                    </p>
-                  </Card>
-                  <Card className="p-4 bg-primary/5">
-                    <p className="text-sm">
-                      <strong>S-Curve Shape:</strong> Smooth progression from low to high risk
-                    </p>
-                  </Card>
-                  <Card className="p-4 bg-destructive/5">
-                    <p className="text-sm">
-                      <strong>Threshold Effect:</strong> Clear decision zones with gradual transitions
-                    </p>
-                  </Card>
-                </div>
-              </Card>
+          <Card className="p-6 mb-8">
+            <h3 className="text-2xl font-semibold mb-6">How It Works - Step by Step</h3>
+            <div className="flex gap-2 flex-wrap mb-4">
+              {[1,2,3].map(step => (
+                <Button key={step} variant={currentStep===step?"default":"outline"} onClick={()=>setCurrentStep(step)} size="sm">Step {step}</Button>
+              ))}
             </div>
-
-            <div className="space-y-6">
-              <Card className="p-6">
-                <h3 className="font-semibold mb-4">Parameters</h3>
-                <div className="space-y-6">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Gamma: {gamma[0].toFixed(2)}</label>
-                    <Slider value={gamma} onValueChange={setGamma} min={0.01} max={1} step={0.01} />
-                    <p className="text-xs text-muted-foreground mt-2">Controls steepness of S-curve</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <h3 className="font-semibold mb-4">Test Patient</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">BMI: {testBMI}</label>
-                    <Slider value={[testBMI]} onValueChange={(v) => setTestBMI(v[0])} min={15} max={40} step={1} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Blood Pressure: {testBP} mmHg</label>
-                    <Slider value={[testBP]} onValueChange={(v) => setTestBP(v[0])} min={90} max={180} step={5} />
-                  </div>
-                  <Button onClick={checkPrediction} className="w-full" size="lg">
-                    Check Risk Level
-                  </Button>
-
-                  {prediction && (
-                    <Card
-                      className={`p-4 ${
-                        prediction === "high"
-                          ? "bg-destructive/10 border-destructive"
-                          : prediction === "moderate"
-                          ? "bg-warning/10 border-warning"
-                          : "bg-success/10 border-success"
-                      }`}
-                    >
-                      <p className="text-center font-semibold">
-                        {prediction === "high" ? "🚨 High Risk" : prediction === "moderate" ? "⚠ Moderate Risk" : "✅ Low Risk"}
-                      </p>
-                    </Card>
-                  )}
-                </div>
-              </Card>
-
-              <Card className="p-4 bg-accent/20">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Medical Application:</strong> Sigmoid boundaries reflect gradual health changes better than sharp divisions
-                </p>
-              </Card>
+            <div className="mt-2 mb-6 p-4 bg-muted/30 rounded-lg">
+              <p className="text-2xl font-semibold mb-2">Step {currentStep}</p>
+              <p className="text-lg text-muted-foreground">
+                {currentStep===1 && "Plot the data points: BMI vs Blood Pressure, low-risk (purple) and high-risk (yellow)."}
+                {currentStep===2 && "Try S-shaped regions that gradually separate low and high risk."}
+                {currentStep===3 && "Show the final S-shaped decision boundary with margins and support vectors."}
+              </p>
             </div>
-          </div>
+            <div className="border border-border rounded-lg overflow-hidden">
+              <canvas ref={canvasRef} width={500} height={500} className="w-full h-auto" />
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-muted/30">
+            <div className="max-w-3xl">
+              <h3 className="text-xl font-semibold mb-2">Want to tune the Sigmoid Kernel?</h3>
+              <p className="text-muted-foreground mb-4">Adjust Gamma and test predictions on a separate page made for parameters.</p>
+              <Link to="/sigmoid-parameters">
+                <Button>Go to Sigmoid Parameters</Button>
+              </Link>
+            </div>
+          </Card>
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Sigmoid Kernel Characteristics</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 text-success">✓ When to Use</h3>
-              <ul className="space-y-2 text-sm">
-                <li>• Neural network-like behavior</li>
-                <li>• Gradual transitions needed</li>
-                <li>• Medical/health applications</li>
-                <li>• Probability-based decisions</li>
-                <li>• Similar to logistic regression</li>
-              </ul>
-            </Card>
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 text-warning">⚠ Limitations</h3>
-              <ul className="space-y-2 text-sm">
-                <li>• Less popular than RBF</li>
-                <li>• Can be unstable with wrong parameters</li>
-                <li>• Not positive semi-definite always</li>
-                <li>• May converge poorly</li>
-                <li>• Requires careful tuning</li>
-              </ul>
-            </Card>
-          </div>
-        </div>
-      </section>
+      {/* Advantages/Limitations moved to RBFParameters page per request */}
     </div>
   );
 };

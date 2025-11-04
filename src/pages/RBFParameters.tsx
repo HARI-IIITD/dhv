@@ -8,8 +8,62 @@ const RBFParameters = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gamma, setGamma] = useState(1);
   const [cValue, setCValue] = useState<"low" | "high">("low");
+  const [gammaMode, setGammaMode] = useState(0);
 
   useEffect(() => { draw(); }, [gamma, cValue]);
+  useEffect(() => {
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0,0,340,220);
+
+    if (gammaMode === 0) {
+      // Low Gamma: 2 large circles/colors, no overlap, all points inside
+      const pass = [
+        {x:250,y:160},{x:265,y:174},{x:280,y:155},{x:270,y:140},{x:235,y:155},{x:255,y:180}
+      ];
+      const fail = [
+        {x:80,y:60},{x:95,y:40},{x:110,y:50},{x:115,y:75},{x:100,y:90},{x:85,y:90}
+      ];
+      ctx.globalAlpha=0.20;
+      ctx.beginPath();ctx.arc(260,160,48,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill(); // Pass
+      ctx.beginPath();ctx.arc(100,70,43,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill(); // Fail
+      ctx.globalAlpha=1.0;
+      pass.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#b45309";ctx.stroke();});
+      fail.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#6d28d9";ctx.stroke();});
+    } else if (gammaMode === 1) {
+      // Balanced: each big circle becomes two, each grouping half the points
+      const passA=[{x:250,y:160},{x:265,y:174},{x:255,y:180}];
+      const passB=[{x:280,y:155},{x:270,y:140},{x:235,y:155}];
+      const failA=[{x:80,y:60},{x:95,y:40},{x:110,y:50}];
+      const failB=[{x:115,y:75},{x:100,y:90},{x:85,y:90}];
+      ctx.globalAlpha=0.21;
+      ctx.beginPath();ctx.arc(255,170,25,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();
+      ctx.beginPath();ctx.arc(265,150,27,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();
+      ctx.beginPath();ctx.arc(97,52,19,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();
+      ctx.beginPath();ctx.arc(105,83,18,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();
+      ctx.globalAlpha=1.0;
+      [...passA,...passB].forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#b45309";ctx.stroke();});
+      [...failA,...failB].forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#6d28d9";ctx.stroke();});
+    } else {
+      // High Gamma: each of previous divides again => 4 per class (8 total), tiny tight clusters
+      const passGroups=[[{x:250,y:160}], [{x:265,y:174},{x:255,y:180}], [{x:280,y:155}], [{x:270,y:140},{x:235,y:155}]];
+      const failGroups=[[{x:80,y:60},{x:95,y:40}], [{x:110,y:50}], [{x:115,y:75},{x:100,y:90}], [{x:85,y:90}]];
+      ctx.globalAlpha=0.23;
+      // Pass groups (yellow)
+      ctx.beginPath();ctx.arc(250,160,13,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();
+      ctx.beginPath();ctx.arc(260,177,13,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();
+      ctx.beginPath();ctx.arc(280,155,13,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();
+      ctx.beginPath();ctx.arc(271,146,13,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();
+      // Fail (purple)
+      ctx.beginPath();ctx.arc(87,48,12,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();
+      ctx.beginPath();ctx.arc(109,50,12,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();
+      ctx.beginPath();ctx.arc(108,82,12,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();
+      ctx.beginPath();ctx.arc(95,90,12,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();
+      ctx.globalAlpha=1.0;
+      passGroups.flat().forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,2*Math.PI);ctx.fillStyle="#eab308";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#b45309";ctx.stroke();});
+      failGroups.flat().forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,2*Math.PI);ctx.fillStyle="#a78bfa";ctx.fill();ctx.lineWidth=2;ctx.strokeStyle="#6d28d9";ctx.stroke();});
+    }
+  }, [gammaMode]);
 
   const clusters = [
     { cx: 0.25, cy: 0.7, radius: 0.16 },
@@ -95,71 +149,93 @@ const RBFParameters = () => {
 
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* What do Gamma and C mean? Section */}
           <Card className="p-6 mb-8">
-            <h3 className="text-2xl font-semibold mb-6">Interactive Visualization</h3>
-            <div className="border border-border rounded-lg overflow-hidden mb-6">
-              <canvas ref={canvasRef} width={600} height={600} className="w-full h-auto" />
-            </div>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <div className="text-center">
-                <div className="font-semibold mb-2">Gamma</div>
-                {[0.5,1,2].map(g => (
-                  <Button key={g} variant={gamma===g?"default":"outline"} size="sm" onClick={()=>setGamma(g)} className="mx-1">{g}</Button>
-                ))}
-                <p className="text-xs text-muted-foreground mt-2">Small = big smooth bubbles • Large = tight bubbles</p>
+            <h3 className="text-xl md:text-2xl font-semibold mb-3">What do Gamma and C mean?</h3>
+            <div className="space-y-4 text-foreground text-base">
+              <div>
+                <p className="font-semibold">Gamma — how big are the “bubbles” we draw?</p>
+                <p className="text-muted-foreground">
+                  Think of dropping a pebble in water. The ripples can be big and gentle or small and tight.
+                  <strong> Gamma</strong> is just a dial for ripple size:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground">
+                  <li><strong>Low gamma</strong>: Big, smooth bubbles that cover a wider area. We look at the big picture.</li>
+                  <li><strong>High gamma</strong>: Small, tight bubbles that hug the dots closely. We focus on tiny details.</li>
+                </ul>
               </div>
-              <div className="text-center">
-                <div className="font-semibold mb-2">C (strictness)</div>
-                {(["low","high"] as const).map(c => (
-                  <Button key={c} variant={cValue===c?"default":"outline"} size="sm" onClick={()=>setCValue(c)} className="mx-1">{c.toUpperCase()}</Button>
-                ))}
-                <p className="text-xs text-muted-foreground mt-2">High C draws sharper, stricter edges</p>
+              <div>
+                <p className="font-semibold">C — how strict is our boundary?</p>
+                <p className="text-muted-foreground">
+                  Imagine drawing a fence between two types of plants.
+                  <strong> C</strong> decides how picky you are when drawing that fence:
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground">
+                  <li><strong>Small C</strong>: A relaxed fence. It stays smooth and simple, even if a few plants end up on the “wrong” side.</li>
+                  <li><strong>Large C</strong>: A very picky fence. It bends and twists to keep every plant perfectly separated, even if the fence gets complicated.</li>
+                </ul>
+                <p className="text-muted-foreground">In short: Gamma controls bubble size; C controls how strict the boundary is.</p>
+              </div>
+            </div>
+          </Card>
+          {/* Interactive visual with Gamma mode buttons */}
+          <Card className="p-6 mb-8">
+            <h3 className="text-2xl font-semibold mb-4">How does Gamma change class grouping?</h3>
+            <div className="flex gap-4 justify-center mb-3">
+              {["Low Gamma", "Balanced", "High Gamma"].map((label, i) => (
+                <button
+                  key={label}
+                  onClick={() => setGammaMode(i)}
+                  className={`px-4 py-2 rounded font-semibold border ${gammaMode===i ? 'bg-primary text-white border-primary' : 'border-border bg-background text-primary'}`}
+                >{label}</button>
+              ))}
+            </div>
+            <div className="border border-border rounded-lg overflow-hidden mb-6 flex flex-col items-center">
+              <canvas ref={canvasRef} width={340} height={220} className="bg-white w-[340px] h-[220px]" />
+              <div className="flex justify-between w-full px-6 text-sm text-muted-foreground mt-1">
+                <span>Hours Studied</span><span>Attendance (%)</span>
               </div>
             </div>
           </Card>
 
-          {/* Parameter Explanations (plain language) */}
-          <Card className="p-6 mb-8">
-            <h3 className="text-xl font-semibold mb-3">What do Gamma and C mean?</h3>
-            <div className="space-y-3 text-muted-foreground text-sm">
-              <p>
-                <strong className="text-foreground">Gamma</strong> controls the <em>size of the bubbles</em> that the model draws around groups of points.
-                Imagine dropping pebbles in water: low gamma makes big, gentle ripples; high gamma makes small, tight ripples.
-              </p>
-              <ul className="list-disc list-inside">
-                <li><strong className="text-foreground">Low Gamma</strong> (e.g., <code>0.5</code>): Large, smooth bubbles that cover more area.</li>
-                <li><strong className="text-foreground">High Gamma</strong> (e.g., <code>2</code>): Small, tight bubbles that hug the dots closely.</li>
-              </ul>
-              <p>
-                <strong className="text-foreground">C</strong> is the model’s <em>strictness</em> about drawing the boundary.
-                Think of a marker: low C is a thin, forgiving line; high C is a bold, sharp line that tries to separate everything strictly.
-              </p>
-              <ul className="list-disc list-inside">
-                <li><strong className="text-foreground">Low C</strong>: Softer, thinner edges—okay with a few mistakes to stay smooth.</li>
-                <li><strong className="text-foreground">High C</strong>: Sharper, thicker edges—tries hard to separate every dot.</li>
-              </ul>
-            </div>
-          </Card>
-
-          <Card className="p-8">
-            <h3 className="text-xl font-semibold mb-3">Advantages & Limitations (plain English)</h3>
+          {/* Advantages & Limitations */}
+          <Card className="p-8 mb-8">
+            <h3 className="text-xl font-semibold mb-3">Advantages & Limitations</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold text-success mb-2">✓ Advantages</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Great at finding round clusters (bubbles)</li>
-                  <li>• Only one main dial (gamma) to tune</li>
-                  <li>• A safe default when you’re unsure</li>
+                <h4 className="font-semibold text-success mb-2">Advantages</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>Works well when groups look like blobs or islands.</li>
+                  <li>Flexible “bubble size” (Gamma) makes it easy to try simple or detailed fits.</li>
+                  <li>Often a strong default when you don’t know which shape will fit best.</li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-warning mb-2">⚠ Limitations</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Too-high gamma can overreact to noise</li>
-                  <li>• Can be slower than a straight-line model</li>
-                  <li>• Harder to explain than simple lines</li>
+                <h4 className="font-semibold text-warning mb-2">Limitations</h4>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>Too-high Gamma can chase noise and overfit.</li>
+                  <li>May be slower than a simple straight-line model on very large datasets.</li>
+                  <li>Harder to explain than a plain line because shapes can be curvy and complex.</li>
                 </ul>
               </div>
+            </div>
+          </Card>
+
+          {/* CTA: Explore Sigmoid Kernel (moved below advantages) */}
+          <Card className="p-6 mb-8 gradient-card hover:shadow-xl transition-all duration-300">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-semibold mb-1">Curious about the Sigmoid Kernel?</h3>
+                <p className="text-muted-foreground max-w-xl">
+                  Think of it like a tiny neural network inside SVM. It carves smooth S‑shaped boundaries—great when your data
+                  flips from “no” to “yes” around a soft threshold. See it in action!
+                </p>
+              </div>
+              <Link to="/sigmoid-kernel">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Explore Sigmoid Kernel
+                </Button>
+              </Link>
             </div>
           </Card>
         </div>
