@@ -11,9 +11,8 @@ import PolynomialKernel from "./pages/PolynomialKernel";
 import RBFKernel from "./pages/RBFKernel";
 import RBFParameters from "./pages/RBFParameters";
 import SigmoidKernel from "./pages/SigmoidKernel";
-import SigmoidParameters from "./pages/SigmoidKernelParameters";
-import NotFound from "./pages/NotFound";
 import SigmoidKernelParameters from "./pages/SigmoidKernelParameters";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
