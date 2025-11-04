@@ -256,7 +256,7 @@ const SigmoidKernel = () => {
             <div className="max-w-3xl">
               <h3 className="text-xl font-semibold mb-2">Want to tune the Sigmoid Kernel?</h3>
               <p className="text-muted-foreground mb-4">Adjust Gamma and test predictions on a separate page made for parameters.</p>
-              <Link to="/sigmoid-parameters">
+              <Link to="/sigmoid-parameter">
                 <Button>Go to Sigmoid Parameters</Button>
               </Link>
             </div>

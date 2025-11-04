@@ -11,7 +11,9 @@ import PolynomialKernel from "./pages/PolynomialKernel";
 import RBFKernel from "./pages/RBFKernel";
 import RBFParameters from "./pages/RBFParameters";
 import SigmoidKernel from "./pages/SigmoidKernel";
+import SigmoidParameters from "./pages/SigmoidKernelParameters";
 import NotFound from "./pages/NotFound";
+import SigmoidKernelParameters from "./pages/SigmoidKernelParameters";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ const App = () => (
           <Route path="/rbf-kernel" element={<RBFKernel />} />
           <Route path="/rbf-parameters" element={<RBFParameters />} />
           <Route path="/sigmoid-kernel" element={<SigmoidKernel />} />
+          <Route path="/sigmoid-parameter" element={<SigmoidKernelParameters />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
