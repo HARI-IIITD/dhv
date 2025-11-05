@@ -215,16 +215,16 @@ const SigmoidKernel = () => {
         </div>
       </header>
 
-      <section className="py-12 px-4 bg-gradient-to-r from-[hsl(var(--kernel-sigmoid))] to-[hsl(var(--warning))] text-white">
+      <section className="py-6 px-4 bg-gradient-to-r from-[hsl(var(--kernel-sigmoid))] to-[hsl(var(--warning))] text-white">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-5xl font-bold mb-4">Sigmoid Kernel</h1>
           <p className="text-xl text-white/90">Neural Network-Style S-Shaped Boundaries</p>
         </div>
       </section>
 
-      <section className="py-16 px-4">
+      <section className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <Card className="p-6 mb-8">
+          <Card className="p-5 mb-4">
             <h2 className="text-2xl font-bold mb-2">What is the Sigmoid Kernel?</h2>
             <p className="text-muted-foreground">
               It draws smooth S-shaped boundaries, similar to a tiny neural network. Great when your data gradually
@@ -247,8 +247,8 @@ const SigmoidKernel = () => {
                 {currentStep===3 && "Show the final S-shaped decision boundary with margins and support vectors."}
               </p>
             </div>
-            <div className="border border-border rounded-lg overflow-hidden">
-              <canvas ref={canvasRef} width={500} height={500} className="w-full h-auto" />
+            <div className="border border-border rounded-lg overflow-hidden max-w-2xl mx-auto">
+              <canvas ref={canvasRef} width={440} height={400} className="w-full h-auto" />
             </div>
           </Card>
 

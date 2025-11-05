@@ -123,6 +123,98 @@ All colors MUST be HSL.
   html {
     scroll-behavior: smooth;
   }
+
+  /* Compact layout: reduce default section padding and heading margins */
+  section {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Reduce excessive heading gaps (including hero titles) */
+  h1 {
+    margin-top: 0 !important;
+    margin-bottom: 0.25rem !important;
+  }
+  /* Ensure media and canvases remain responsive within scaled layout */
+  img, canvas, svg, video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  h2 {
+    margin-top: 0 !important;
+    margin-bottom: 0.4rem !important;
+  }
+  h3 { margin-top: 0 !important; margin-bottom: 0.4rem !important; }
+  h4 { margin-top: 0 !important; margin-bottom: 0.5rem !important; }
+
+  /* Tighten common Tailwind margin utilities globally */
+  .mb-16 { margin-bottom: 0.75rem !important; }
+  .mb-12 { margin-bottom: 0.6rem !important; }
+  .mb-8 { margin-bottom: 0.75rem !important; }
+  .mt-16 { margin-top: 0.75rem !important; }
+  .mt-12 { margin-top: 0.6rem !important; }
+  .mt-8 { margin-top: 0.75rem !important; }
+  .my-16 { margin-top: 0.75rem !important; margin-bottom: 0.75rem !important; }
+  .my-12 { margin-top: 0.6rem !important; margin-bottom: 0.6rem !important; }
+
+  /* Ensure hero sections are not overly tall */
+  section.gradient-hero {
+    padding-top: 1.75rem !important;
+    padding-bottom: 1.75rem !important;
+  }
+
+  /* Tighten common large paddings if applied outside sections */
+  .py-24 { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
+  .py-20 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+  .py-16 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+
+  /* Reduce large grid gaps between blocks */
+  .gap-12 { gap: 1rem !important; }
+  .gap-16 { gap: 1.25rem !important; }
+  
+  /* Desktop scale-up: increase rem size significantly while preventing overflow */
+  @media (min-width: 1024px) {
+    html {
+      font-size: 13px; /* ~18% increase from prior 11px */
+    }
+    /* Reduce vertical whitespace between sections on desktop */
+    section {
+      padding-top: 2rem !important; /* keep compact but proportional */
+      padding-bottom: 2rem !important;
+      padding-left: 1.25rem !important;
+      padding-right: 1.25rem !important;
+    }
+    body { overflow-x: hidden; }
+  }
+
+  @media (min-width: 1440px) {
+    html {
+      font-size: 11px; /* ~10% increase from prior 10px */
+    }
+    section {
+      padding-top: 2.25rem !important;
+      padding-bottom: 2.25rem !important;
+      padding-left: 1.5rem !important;
+      padding-right: 1.5rem !important;
+    }
+    body { overflow-x: hidden; }
+  }
+
+  @media (min-width: 1920px) {
+    html {
+      font-size: 11px; /* ~10% increase from prior 10px */
+    }
+    section {
+      padding-top: 2.5rem !important;
+      padding-bottom: 2.5rem !important;
+      padding-left: 1.75rem !important;
+      padding-right: 1.75rem !important;
+    }
+    body { overflow-x: hidden; }
+  }
 }
 
 @layer utilities {
