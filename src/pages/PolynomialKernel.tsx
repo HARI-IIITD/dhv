@@ -215,15 +215,15 @@ const PolynomialKernel = () => {
           <div className="text-sm text-muted-foreground">Polynomial Kernel</div>
         </div>
       </header>
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[hsl(var(--kernel-polynomial))] to-[hsl(var(--secondary))] text-white">
+      <section className="py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[hsl(var(--kernel-polynomial))] to-[hsl(var(--secondary))] text-white">
         <div className="max-w-5xl mx-auto text-center animate-fade-in">
           <h1 className="text-5xl font-bold mb-4">Polynomial Kernel</h1>
           <p className="text-xl text-white/90">Try curves—or even a straight line!</p>
         </div>
       </section>
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid lg:grid-cols-3 gap-4 mb-6">
             {introCards.map((c, i) => (
               <Card key={i} className="p-6 gradient-card hover:shadow-lg">
                 <h3 className="text-xl font-semibold mb-3">{c.title}</h3>
@@ -232,7 +232,7 @@ const PolynomialKernel = () => {
             ))}
           </div>
           {/* Dataset Explanation */}
-          <Card className="p-8 mb-12 gradient-card">
+          <Card className="p-6 mb-6 gradient-card">
             <h3 className="text-2xl font-semibold mb-4">Understanding the Dataset</h3>
             <div className="space-y-4">
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -241,10 +241,10 @@ const PolynomialKernel = () => {
             </div>
           </Card>
           {/* Simple Visualization section for degree 1-3 */}
-          <section className="py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-lg mx-auto text-center space-y-8">
+          <section className="py-4 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-lg mx-auto text-center space-y-4">
               <Card className="p-6">
-                <h3 className="font-semibold mb-6">Decision Boundary Visualization</h3>
+                <h3 className="font-semibold mb-3">Decision Boundary Visualization</h3>
                 <div className="flex gap-2 justify-center mb-4">
                   {[1, 2, 3].map((d) => (
                     <Button key={d} variant={degree === d ? "default" : "outline"} size="sm" onClick={() => setDegree(d)}>
@@ -259,7 +259,7 @@ const PolynomialKernel = () => {
           </section>
 
           {/* Degree Parameter Explanation (plain language) */}
-          <section className="py-4 px-4 sm:px-6 lg:px-8">
+          <section className="py-3 px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
               <Card className="p-6">
                 <h3 className="text-xl font-semibold mb-3">What does "degree" mean?</h3>
@@ -285,10 +285,10 @@ const PolynomialKernel = () => {
           </section>
 
           {/* When to Use & Limitations */}
-          <section className="py-8 px-4 sm:px-6 lg:px-8">
+          <section className="py-4 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center">Advantages & Limitations</h2>
-              <div className="grid md:grid-cols-2 gap-8">
+              <h2 className="text-3xl font-bold mb-4 text-center">Advantages & Limitations</h2>
+              <div className="grid md:grid-cols-2 gap-4">
                 <Card className="p-8 gradient-card">
                   <h3 className="text-2xl font-semibold mb-6 text-success">✓ Advantages</h3>
                   <ul className="space-y-3">
@@ -316,7 +316,7 @@ const PolynomialKernel = () => {
           </section>
 
           {/* CTA to RBF Kernel */}
-          <section className="py-12 px-4 sm:px-6 lg:px-8">
+          <section className="py-6 px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h3 className="text-2xl font-semibold mb-4">Ready to see an even more flexible curve?</h3>
               <p className="text-muted-foreground mb-6">Check out the RBF Kernel. It can draw very smooth shapes around clusters of points.</p>

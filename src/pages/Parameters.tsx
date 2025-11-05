@@ -679,7 +679,7 @@ const Parameters = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 gradient-hero">
+      <section className="py-8 px-4 sm:px-6 lg:px-8 gradient-hero">
         <div className="max-w-5xl mx-auto text-center text-white animate-fade-in">
           <h1 className="text-5xl font-bold mb-4">The Building Blocks of SVM</h1>
           <p className="text-xl text-white/90">Understanding parameters, margins, support vectors, and kernels</p>
@@ -687,11 +687,11 @@ const Parameters = () => {
       </section>
 
       {/* Section 1: Margins */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold mb-12 text-center">Understanding Parameters & Margins</h2>
+          <h2 className="text-4xl font-bold mb-6 text-center">Understanding Parameters & Margins</h2>
 
-          <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
             <div className="space-y-6 animate-slide-up">
               <Card className="p-8 gradient-card">
                 <h3 className="text-2xl font-semibold mb-4">What is a Margin?</h3>
@@ -819,9 +819,9 @@ const Parameters = () => {
       </section>
 
       {/* Section 2: Support Vectors */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold mb-12 text-center">Support Vectors: The VIP Data Points</h2>
+          <h2 className="text-4xl font-bold mb-6 text-center">Support Vectors: The VIP Data Points</h2>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 animate-slide-up order-2 lg:order-1">
@@ -887,9 +887,9 @@ const Parameters = () => {
       </section>
 
       {/* Section 3: Kernels */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="text-4xl font-bold mb-4">Choose Your Kernel</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Kernels transform data to make separation easier. Different patterns require different kernels.

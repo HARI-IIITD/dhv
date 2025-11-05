@@ -134,7 +134,7 @@ const RBFKernel = () => {
       </header>
 
       {/* Hero */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[hsl(var(--kernel-rbf))] to-[hsl(var(--success))] text-white">
+      <section className="py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[hsl(var(--kernel-rbf))] to-[hsl(var(--success))] text-white">
         <div className="max-w-5xl mx-auto text-center animate-fade-in">
           <h1 className="text-5xl font-bold mb-4">RBF Kernel (Radial Basis Function)</h1>
           <p className="text-xl text-white/90">Bubbles around clusters – super flexible</p>
@@ -142,9 +142,9 @@ const RBFKernel = () => {
       </section>
 
       {/* Intro Cards + Dataset */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid lg:grid-cols-3 gap-4 mb-6">
             {introCards.map((c, i) => (
               <Card key={i} className="p-6 gradient-card hover:shadow-lg">
                 <h3 className="text-xl font-semibold mb-3">{c.title}</h3>
@@ -152,13 +152,13 @@ const RBFKernel = () => {
               </Card>
             ))}
           </div>
-          <Card className="p-8 mb-12 gradient-card">
+          <Card className="p-6 mb-6 gradient-card">
             <h3 className="text-2xl font-semibold mb-4">Understanding the Dataset</h3>
             <p className="text-muted-foreground leading-relaxed">{datasetText}</p>
           </Card>
 
           {/* Step-by-step Visual */}
-          <Card className="p-6 mb-8">
+          <Card className="p-5 mb-4">
             <h3 className="text-2xl font-semibold mb-6">How It Works - Step by Step</h3>
             <div className="space-y-4">
               <div className="flex gap-2 flex-wrap mb-4">
@@ -170,14 +170,14 @@ const RBFKernel = () => {
                 <p className="text-2xl font-semibold mb-2">Step {currentStep}: {steps[currentStep-1].label}</p>
                 <p className="text-lg text-muted-foreground">{steps[currentStep-1].detail}</p>
               </div>
-              <div className="border border-border rounded-lg overflow-hidden">
-                <canvas ref={canvasRef} width={500} height={500} className="w-full h-auto" />
+              <div className="border border-border rounded-lg overflow-hidden max-w-2xl mx-auto">
+                <canvas ref={canvasRef} width={440} height={400} className="w-full h-auto" />
               </div>
             </div>
           </Card>
 
           {/* Parameters CTA */}
-          <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
+          <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/30">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-6">Ready to Explore Parameters?</h2>
               <p className="text-xl text-muted-foreground mb-8">Learn how Gamma and C change the RBF decision regions.</p>
