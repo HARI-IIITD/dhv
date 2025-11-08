@@ -691,8 +691,8 @@ const Parameters = () => {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold mb-6 text-center">Understanding Parameters & Margins</h2>
 
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
-            <div className="space-y-6 animate-slide-up">
+          <div className="grid lg:grid-cols-2 gap-6 mb-8 items-stretch">
+            <div className="space-y-6 animate-slide-up flex flex-col">
               <Card className="p-8 gradient-card">
                 <h3 className="text-2xl font-semibold mb-4">What is a Margin?</h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
@@ -722,42 +722,44 @@ const Parameters = () => {
               </Card>
             </div>
 
-            <div className="flex flex-col items-center justify-center">
-              {/* Toggle Button */}
-              <div className="mb-6 flex gap-4">
-                <Button
-                  variant={marginType === "hard" ? "default" : "outline"}
-                  onClick={() => setMarginType("hard")}
-                  className="px-6"
-                >
-                  Hard Margin
-                </Button>
-                <Button
-                  variant={marginType === "soft" ? "default" : "outline"}
-                  onClick={() => setMarginType("soft")}
-                  className="px-6"
-                >
-                  Soft Margin
-                </Button>
-              </div>
-
+            <div className="flex flex-col">
               {/* Visualization */}
-              <Card className="p-8 w-full max-w-4xl gradient-card hover:shadow-xl transition-all duration-300">
-                <div className="mb-4">
+              <Card className="p-8 w-full gradient-card hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                {/* Toggle Button */}
+                <div className="flex-shrink-0 mb-6 flex gap-4 justify-center">
+                  <Button
+                    variant={marginType === "hard" ? "default" : "outline"}
+                    onClick={() => setMarginType("hard")}
+                    className="px-6"
+                  >
+                    Hard Margin
+                  </Button>
+                  <Button
+                    variant={marginType === "soft" ? "default" : "outline"}
+                    onClick={() => setMarginType("soft")}
+                    className="px-6"
+                  >
+                    Soft Margin
+                  </Button>
+                </div>
+
+                <div className="flex-shrink-0 mb-4">
                   <h3 className="text-lg font-semibold text-center mb-2">
                     {marginType === "hard" ? "Hard Margin Visualization" : "Soft Margin Visualization"}
                   </h3>
                 </div>
                 
-                <canvas
-                  ref={canvasRef}
-                  width={800}
-                  height={500}
-                  className="w-full h-auto rounded-lg border-2 border-border shadow-lg bg-white"
-                />
+                <div className="flex-shrink-0">
+                  <canvas
+                    ref={canvasRef}
+                    width={800}
+                    height={500}
+                    className="w-full h-auto rounded-lg border-2 border-border shadow-lg bg-white"
+                  />
+                </div>
 
                 {/* Explanation */}
-                <div className={`mt-6 p-4 rounded-lg border-2 ${
+                <div className={`mt-6 p-4 rounded-lg border-2 flex-shrink-0 ${
                   marginType === "hard" 
                     ? "bg-blue-50 border-blue-200" 
                     : "bg-orange-50 border-orange-200"
@@ -792,7 +794,7 @@ const Parameters = () => {
                 </div>
 
                 {/* Key Elements Legend */}
-                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-full bg-red-500"></div>
                     <span className="text-muted-foreground">Class 0 (Red)</span>
@@ -821,11 +823,12 @@ const Parameters = () => {
       {/* Section 2: Support Vectors */}
       <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold mb-6 text-center">Support Vectors: The VIP Data Points</h2>
+          <h2 className="text-4xl font-bold mb-8 text-center">Support Vectors: The VIP Data Points</h2>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 animate-slide-up order-2 lg:order-1">
-              <Card className="p-8 gradient-card">
+          {/* Text Card and Visualization - Side by Side */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-8 items-stretch">
+            <div className="animate-slide-up">
+              <Card className="p-8 gradient-card h-full flex flex-col">
                 <h3 className="text-2xl font-semibold mb-4">What are Support Vectors?</h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   Support vectors are the data points closest to the decision boundary. They are like pillars holding up a fence—only these critical points determine where the boundary is drawn.
@@ -834,24 +837,11 @@ const Parameters = () => {
                   <strong className="text-foreground">Key insight:</strong> All other data points could be removed without changing the boundary. Only support vectors matter!
                 </p>
               </Card>
-
-              <div className="grid sm:grid-cols-3 gap-4">
-                {[
-                  { title: "Why Important?", text: "They define the entire decision boundary" },
-                  { title: "How Many?", text: "Usually just a small subset of all data" },
-                  { title: "What Makes Them Special?", text: "Closest points to the boundary" },
-                ].map((item, index) => (
-                  <Card key={index} className="p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground">{item.text}</p>
-                  </Card>
-                ))}
-              </div>
             </div>
 
-            <div className="order-1 lg:order-2">
-              <Card className="p-8 gradient-card hover:shadow-xl transition-all duration-300">
-                <div className="mb-4">
+            <div>
+              <Card className="p-8 gradient-card hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                <div className="flex-shrink-0 mb-4">
                   <h3 className="text-lg font-semibold text-center mb-4">Interactive Support Vector Demonstration</h3>
                   <div className="flex gap-2 justify-center mb-4">
                     <Button
@@ -866,13 +856,15 @@ const Parameters = () => {
                     </Button>
                   </div>
                 </div>
-                <canvas
-                  ref={svCanvasRef}
-                  width={600}
-                  height={500}
-                  className="w-full h-auto rounded-lg border-2 border-border shadow-lg bg-white"
-                />
-                <div className="mt-4 text-center">
+                <div className="flex-shrink-0">
+                  <canvas
+                    ref={svCanvasRef}
+                    width={600}
+                    height={500}
+                    className="w-full h-auto rounded-lg border-2 border-border shadow-lg bg-white"
+                  />
+                </div>
+                <div className="mt-4 text-center flex-shrink-0">
                   <p className="text-sm text-muted-foreground">
                     {animationState === "idle" && "Click 'Show Boundary' to see how support vectors define the margin"}
                     {animationState === "formed" && "✅ Support vectors on margin boundaries define the decision boundary and margin width"}
@@ -881,6 +873,22 @@ const Parameters = () => {
                   </p>
                 </div>
               </Card>
+            </div>
+          </div>
+
+          {/* Three Mini Info Boxes - Centered Below */}
+          <div className="flex justify-center">
+            <div className="grid sm:grid-cols-3 gap-4 max-w-3xl w-full">
+              {[
+                { title: "Why Important?", text: "They define the entire decision boundary" },
+                { title: "How Many?", text: "Usually just a small subset of all data" },
+                { title: "What Makes Them Special?", text: "Closest points to the boundary" },
+              ].map((item, index) => (
+                <Card key={index} className="p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                  <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
+                  <p className="text-xs text-muted-foreground">{item.text}</p>
+                </Card>
+              ))}
             </div>
           </div>
         </div>

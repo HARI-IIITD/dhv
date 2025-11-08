@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Brain, Target, TrendingUp, ArrowRight } from "lucide-react";
+import { Brain, Target, TrendingUp, ArrowRight, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -219,17 +219,15 @@ const Introduction = () => {
             </div>
           </Card>
 
-          {/* Classification vs Regression */}
-          <div className="mt-12 max-w-5xl mx-auto">
-            <Card className="p-8 gradient-card hover:shadow-xl transition-all duration-300">
-              <div className="grid md:grid-cols-3 gap-6 items-center">
-                <div className="flex justify-center md:justify-start">
-                  <div className="p-4 rounded-full bg-primary/10">
-                    <TrendingUp className="w-12 h-12 text-primary" />
-                  </div>
+          {/* Classification vs Regression and Understanding Parameters and Margin */}
+          <div className="grid md:grid-cols-2 gap-8 mt-12">
+            <Card className="p-8 gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 animate-slide-up">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-lg bg-primary/10">
+                  <TrendingUp className="w-8 h-8 text-primary" />
                 </div>
-                <div className="md:col-span-2 text-center md:text-left">
-                  <h2 className="text-2xl font-bold mb-3">Classification vs Regression</h2>
+                <div>
+                  <h3 className="text-2xl font-semibold mb-3">Classification vs Regression</h3>
                   <div className="space-y-3 text-muted-foreground">
                     <p className="leading-relaxed">
                       SVM can do two main things: <strong className="text-foreground">Classification</strong> (putting things into categories) 
@@ -244,28 +242,29 @@ const Introduction = () => {
                 </div>
               </div>
             </Card>
-          </div>
-        </div>
-      </section>
 
-      {/* Understanding Parameters and Margin */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <Card className="p-8 gradient-card hover:shadow-xl transition-all duration-300">
-            <h2 className="text-2xl font-bold mb-4">Understanding Parameters and Margin</h2>
-            <div className="space-y-4 text-muted-foreground">
-              <div>
-                <p className="text-lg font-semibold text-foreground">Q: What is a parameter?</p>
-                <p className="leading-relaxed">
-                  Think of a parameter as a simple setting or knob you can turn to change how the model behaves. 
-                  Just like adjusting the volume on a speaker, parameters let us make the model more relaxed or more strict. 
-                  In SVM, these settings can affect how wide the safe space (margin) is between groups and how much the model
-                  cares about avoiding mistakes. You don’t need any math to get the idea—parameters are just controls that help
-                  the model separate things more clearly.
-                </p>
+            <Card className="p-8 gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-lg bg-secondary/10">
+                  <Settings className="w-8 h-8 text-secondary" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-semibold mb-3">Understanding Parameters and Margin</h3>
+                  <div className="space-y-3 text-muted-foreground">
+                    <p className="leading-relaxed">
+                      Think of a parameter as a simple setting or knob you can turn to change how the model behaves. 
+                      Just like adjusting the volume on a speaker, parameters let us make the model more relaxed or more strict.
+                    </p>
+                    <p className="leading-relaxed">
+                      In SVM, these settings can affect how wide the safe space (margin) is between groups and how much the model
+                      cares about avoiding mistakes. You don't need any math to get the idea—parameters are just controls that help
+                      the model separate things more clearly.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </section>
 

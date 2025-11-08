@@ -20,24 +20,26 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Introduction />} />
-          <Route path="/parameters" element={<Parameters />} />
-          <Route path="/linear-kernel" element={<LinearKernel />} />
-          <Route path="/linear-parameters" element={<LinearParameters />} />
-          <Route path="/polynomial-kernel" element={<PolynomialKernel />} />
-          <Route path="/rbf-kernel" element={<RBFKernel />} />
-          <Route path="/rbf-parameters" element={<RBFParameters />} />
-          <Route path="/sigmoid-kernel" element={<SigmoidKernel />} />
-          <Route path="/sigmoid-parameter" element={<SigmoidKernelParameters />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <div className="app-zoom-container">
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Introduction />} />
+            <Route path="/parameters" element={<Parameters />} />
+            <Route path="/linear-kernel" element={<LinearKernel />} />
+            <Route path="/linear-parameters" element={<LinearParameters />} />
+            <Route path="/polynomial-kernel" element={<PolynomialKernel />} />
+            <Route path="/rbf-kernel" element={<RBFKernel />} />
+            <Route path="/rbf-parameters" element={<RBFParameters />} />
+            <Route path="/sigmoid-kernel" element={<SigmoidKernel />} />
+            <Route path="/sigmoid-parameter" element={<SigmoidKernelParameters />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );

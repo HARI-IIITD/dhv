@@ -118,10 +118,63 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
   }
 
   html {
     scroll-behavior: smooth;
+  }
+
+  /* Zoom container for the entire app - scales content by 15% for a closer, more engaging view */
+  .app-zoom-container {
+    transform: scale(1.15);
+    transform-origin: top center;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Desktop: Center the scaled content horizontally and prevent overflow */
+  @media (min-width: 1024px) {
+    html {
+      overflow-x: hidden;
+    }
+    
+    body {
+      overflow-x: hidden;
+    }
+    
+    .app-zoom-container {
+      transform: scale(1.15);
+      transform-origin: center top;
+      width: 87%; /* Compensates for 1.15 scale (100/1.15 ≈ 87) */
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  /* Tablet: Moderate zoom for balance */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .app-zoom-container {
+      transform: scale(1.12);
+      transform-origin: center top;
+      width: 89%; /* Compensates for 1.12 scale (100/1.12 ≈ 89) */
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  /* Mobile: Smaller zoom to maintain usability */
+  @media (max-width: 767px) {
+    .app-zoom-container {
+      transform: scale(1.08);
+      transform-origin: top center;
+      width: 93%; /* Compensates for 1.08 scale (100/1.08 ≈ 93) */
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   /* Compact layout: reduce default section padding and heading margins */
