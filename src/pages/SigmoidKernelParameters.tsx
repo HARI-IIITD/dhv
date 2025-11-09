@@ -114,15 +114,15 @@ const SigmoidKernelParameters = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/sigmoid-kernel">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2" /> Back to Sigmoid Kernel
-            </Button>
-          </Link>
-          <div className="text-sm text-muted-foreground">Sigmoid Parameters</div>
-        </div>
-      </header>
+            <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+              <Link to="/sigmoid-kernel">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="mr-2" /> Back to Sigmoid Kernel
+                </Button>
+              </Link>
+              <div className="text-sm text-muted-foreground">Sigmoid Parameters</div>
+            </div>
+          </header>
 
       <section className="py-12 px-4">
         <div className="max-w-5xl mx-auto">
@@ -197,8 +197,6 @@ const SigmoidKernelParameters = () => {
       </section>
     </div>
   );
-};
+}
 
 export default SigmoidKernelParameters;
-
-

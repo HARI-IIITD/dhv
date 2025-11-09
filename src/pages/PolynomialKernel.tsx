@@ -205,7 +205,7 @@ const PolynomialKernel = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Link to="/parameters">
             <Button variant="ghost" size="sm">
@@ -215,36 +215,37 @@ const PolynomialKernel = () => {
           <div className="text-sm text-muted-foreground">Polynomial Kernel</div>
         </div>
       </header>
+      {/* spacer to offset the fixed header so page content starts below it */}
+      <div className="h-16" aria-hidden="true" />
       <section className="py-6 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[hsl(var(--kernel-polynomial))] to-[hsl(var(--secondary))] text-white">
         <div className="max-w-5xl mx-auto text-center animate-fade-in">
           <h1 className="text-5xl font-bold mb-4">Polynomial Kernel</h1>
           <p className="text-xl text-white/90">Try curves—or even a straight line!</p>
         </div>
       </section>
-      <section className="py-8 px-4 sm:px-6 lg:px-8">
+      <section className="py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-4 mb-6">
-            {introCards.map((c, i) => (
-              <Card key={i} className="p-6 gradient-card hover:shadow-lg">
-                <h3 className="text-xl font-semibold mb-3">{c.title}</h3>
-                <p className="text-sm text-muted-foreground">{c.text}</p>
-              </Card>
-            ))}
-          </div>
-          {/* Dataset Explanation */}
-          <Card className="p-6 mb-6 gradient-card">
-            <h3 className="text-2xl font-semibold mb-4">Understanding the Dataset</h3>
-            <div className="space-y-4">
+          {/* Top row: Intro and Dataset side by side */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            {/* Intro Card */}
+            <Card className="p-6 gradient-card hover:shadow-lg h-full">
+              <h3 className="text-xl font-semibold mb-3">{introCards[0].title}</h3>
+              <p className="text-muted-foreground">{introCards[0].text}</p>
+            </Card>
+
+            {/* Dataset Card */}
+            <Card className="p-6 gradient-card h-full">
+              <h3 className="text-xl font-semibold mb-3">Understanding the Dataset</h3>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                 {datasetText}
               </p>
-            </div>
-          </Card>
-          {/* Simple Visualization section for degree 1-3 */}
-          <section className="py-4 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-lg mx-auto text-center space-y-4">
-              <Card className="p-6">
-                <h3 className="font-semibold mb-3">Decision Boundary Visualization</h3>
+            </Card>
+          </div>
+          {/* Visualization section for degree 1-3 */}
+          <div className="py-4 px-4 sm:px-6 lg:px-8">
+            <Card className="p-6 gradient-card">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Decision Boundary Visualization</h3>
                 <div className="flex gap-2 justify-center mb-4">
                   {[1, 2, 3].map((d) => (
                     <Button key={d} variant={degree === d ? "default" : "outline"} size="sm" onClick={() => setDegree(d)}>
@@ -252,61 +253,66 @@ const PolynomialKernel = () => {
                     </Button>
                   ))}
                 </div>
-                <div className="mb-2 text-muted-foreground font-medium">{degreeLabels[degree]}</div>
-                <canvas ref={canvasRef} width={600} height={600} className="w-full h-auto border border-border rounded-lg" />
-              </Card>
-            </div>
-          </section>
+                <div className="mb-4 text-muted-foreground font-medium">{degreeLabels[degree]}</div>
+                <div className="max-w-3xl mx-auto">
+                  <canvas ref={canvasRef} width={600} height={600} className="w-full h-auto border border-border rounded-lg shadow-sm" />
+                </div>
+              </div>
+            </Card>
+          </div>
 
-          {/* Degree Parameter Explanation (plain language) */}
-          <section className="py-3 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <Card className="p-6">
-                <h3 className="text-xl font-semibold mb-3">What does "degree" mean?</h3>
-                <p className="text-muted-foreground mb-4">
-                  Think of <strong className="text-foreground">degree</strong> as how bendy the separating line is. Higher degree = more bend.
-                </p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>
-                    <strong className="text-foreground">Degree 1</strong>: A simple straight line. Good when one side is mostly purple and the other is yellow.
-                  </li>
-                  <li>
-                    <strong className="text-foreground">Degree 2</strong>: A smooth U-shaped curve. Helpful when the two groups wrap around each other a little and a straight line can’t split them.
-                  </li>
-                  <li>
-                    <strong className="text-foreground">Degree 3</strong>: A double wave (S-shaped) line. Useful when the pattern bends twice, so you need a wavy split.
-                  </li>
-                </ul>
-                <p className="text-xs text-muted-foreground mt-4">
-                  Tip: Start from Degree 1. If a straight line can’t separate the dots, try Degree 2. If it still doesn’t work, try Degree 3.
-                </p>
-              </Card>
-            </div>
-          </section>
-
-          {/* When to Use & Limitations */}
-          <section className="py-4 px-4 sm:px-6 lg:px-8">
+          {/* Three-column layout for Degree, Advantages, and Limitations */}
+          <section className="py-6 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl font-bold mb-4 text-center">Advantages & Limitations</h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Card className="p-8 gradient-card">
-                  <h3 className="text-2xl font-semibold mb-6 text-success">✓ Advantages</h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Degree Explanation */}
+                <Card className="p-6 gradient-card">
+                  <h3 className="text-xl font-semibold mb-4">What does "degree" mean?</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Think of <strong className="text-foreground">degree</strong> as how bendy the separating line is. Higher degree = more bend.
+                  </p>
+                  <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary font-bold mt-1">•</span>
+                      <span><strong className="text-foreground">Degree 1:</strong> A simple straight line dividing purple and yellow.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary font-bold mt-1">•</span>
+                      <span><strong className="text-foreground">Degree 2:</strong> A smooth U-shaped curve for wrapped groups.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary font-bold mt-1">•</span>
+                      <span><strong className="text-foreground">Degree 3:</strong> A wavy S-shaped line for complex patterns.</span>
+                    </li>
+                  </ul>
+                  <div className="mt-4 p-3 rounded-lg bg-muted/30">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>💡 Tip:</strong> Start simple (Degree 1) and increase only if needed.
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Advantages */}
+                <Card className="p-6 gradient-card">
+                  <h3 className="text-xl font-semibold mb-4 text-success">✓ Advantages</h3>
                   <ul className="space-y-3">
                     {advantages.map((item, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-success font-bold">•</span>
-                        <span className="text-base">{item}</span>
+                        <span className="text-success font-bold mt-1">•</span>
+                        <span className="text-muted-foreground">{item}</span>
                       </li>
                     ))}
                   </ul>
                 </Card>
-                <Card className="p-8 gradient-card">
-                  <h3 className="text-2xl font-semibold mb-6 text-warning">⚠ Limitations</h3>
+
+                {/* Limitations */}
+                <Card className="p-6 gradient-card">
+                  <h3 className="text-xl font-semibold mb-4 text-warning">⚠ Limitations</h3>
                   <ul className="space-y-3">
                     {limitations.map((item, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-warning font-bold">•</span>
-                        <span className="text-base">{item}</span>
+                        <span className="text-warning font-bold mt-1">•</span>
+                        <span className="text-muted-foreground">{item}</span>
                       </li>
                     ))}
                   </ul>

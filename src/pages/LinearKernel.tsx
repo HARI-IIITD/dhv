@@ -12,7 +12,6 @@ const LinearKernel = () => {
   const [testScore, setTestScore] = useState(650);
   const [prediction, setPrediction] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
-
   useEffect(() => {
     drawHowItWorks();
   }, [currentStep]);
@@ -109,7 +108,6 @@ const LinearKernel = () => {
         { x: width * 0.5 },
         { x: width * 0.55 },
       ];
-
       lines.forEach((line, idx) => {
         ctx.strokeStyle = "#9CA3AF"; // All lines are candidate lines
         ctx.lineWidth = 1;
@@ -125,8 +123,8 @@ const LinearKernel = () => {
       ctx.setLineDash([]);
     }
 
-    // Step 3: Show optimal line with margin
-    if (currentStep >= 3) {
+  // Step 3: Show optimal line with margin
+  if (currentStep >= 3) {
       // Redraw points (they may have been covered by lines in step 2)
       class0Points.forEach((point) => {
         const x = padding + point.x * (width - 2 * padding);
@@ -146,8 +144,8 @@ const LinearKernel = () => {
         ctx.fill();
       });
       
-      const boundaryX = width / 2;
-      const marginWidth = 40;
+    const boundaryX = width / 2;
+    const marginWidth = 40;
 
       // Draw margin region background
       const gradient1 = ctx.createLinearGradient(boundaryX - marginWidth, 0, boundaryX, 0);
@@ -185,8 +183,8 @@ const LinearKernel = () => {
       ctx.stroke();
     }
 
-    // Step 4: Highlight support vectors
-    if (currentStep >= 4) {
+  // Step 4: Highlight support vectors
+  if (currentStep >= 4) {
       // Support vectors are the closest points to the boundary (on margin boundaries)
       const boundaryX = width / 2;
       const marginWidth = 40;
@@ -257,8 +255,9 @@ const LinearKernel = () => {
           <p className="text-xl text-white/90">The Foundation - Creating Straight Decision Boundaries</p>
         </div>
       </section>
-
       {/* Introduction */}
+      {/* Page zoom wrapper (approx. 10% scale) - keeps header unscaled */}
+      <div className="transform origin-top scale-110 md:scale-110 sm:scale-105">
       <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-6 mb-12">
@@ -272,6 +271,12 @@ const LinearKernel = () => {
               <h3 className="text-xl font-semibold mb-3">When to Use</h3>
               <p className="text-sm text-muted-foreground">
                 Perfect for linearly separable data: spam detection, text classification, and binary decisions.
+              </p>
+            </Card>
+            <Card className="p-6 gradient-card hover:shadow-lg transition-all duration-300">
+              <h3 className="text-xl font-semibold mb-3">Real-world Example</h3>
+              <p className="text-sm text-muted-foreground">
+                Bank loan approval is a common example — use income and credit score to draw a straight decision boundary that separates approved and rejected applicants.
               </p>
             </Card>
           </div>
@@ -336,7 +341,8 @@ const LinearKernel = () => {
                 ))}
               </div>
               {/* Move step details here and enlarge the text */}
-              <div className="mt-2 mb-6 p-4 bg-muted/30 rounded-lg">
+              {/* Animated step details: key on currentStep to retrigger animation */}
+              <div key={currentStep} className="mt-2 mb-6 p-4 bg-muted/30 rounded-lg animate-slide-up transition-all duration-300 ease-out">
                 <p className="text-lg font-semibold mb-2">
                   Step {currentStep}:
                   {currentStep === 1 && " Plot all data points in space"}
@@ -362,9 +368,10 @@ const LinearKernel = () => {
             </div>
           </Card>
         </div>
-      </section>
+  </section>
+  </div>
 
-      {/* Parameters Link Section */}
+  {/* Parameters Link Section */}
       <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Explore Parameters?</h2>
