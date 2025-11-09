@@ -12,91 +12,55 @@ const Parameters = () => {
   const [removedSVIndex, setRemovedSVIndex] = useState<number | null>(null);
   const animationStartTimeRef = useRef<number | null>(null);
 
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   // Generate fixed data points with support vectors ON the margin boundaries
   const { class0Points, class1Points, misclassifiedPoints } = useMemo(() => {
-    // For 800px width, 50px padding, marginWidth hard=50, soft=30
-    // Boundary at x = 400 (0.5 normalized)
-    // Hard margin: left margin at 0.5 - 50/700 = ~0.4286, right margin at 0.5 + 50/700 = ~0.5714
-    // Soft margin: left margin at 0.5 - 30/700 = ~0.4571, right margin at 0.5 + 30/700 = ~0.5429
-    
+    // Hard margin vs soft margin placements (normalized coordinates)
     if (marginType === "hard") {
-      // Hard margin: Support vectors ON the margin boundaries (at x ≈ 0.4286 and x ≈ 0.5714)
-      const hardMarginLeft = 0.5 - 50 / 700; // ≈ 0.4286
-      const hardMarginRight = 0.5 + 50 / 700; // ≈ 0.5714
-      
+      const hardMarginRight = 0.5714;
+
       const hardClass0 = [
-        { x: 0.15, y: 0.2 }, { x: 0.2, y: 0.3 }, { x: 0.18, y: 0.45 },
-        { x: 0.25, y: 0.55 }, { x: 0.22, y: 0.7 }, { x: 0.2, y: 0.85 },
-        { x: 0.28, y: 0.15 }, { x: 0.26, y: 0.4 }, { x: 0.24, y: 0.6 },
-        { x: 0.23, y: 0.75 },
+        { x: 0.15, y: 0.2, isSupportVector: false }, { x: 0.2, y: 0.3, isSupportVector: false }, { x: 0.18, y: 0.45, isSupportVector: false },
+        { x: 0.25, y: 0.55, isSupportVector: false }, { x: 0.22, y: 0.7, isSupportVector: false }, { x: 0.2, y: 0.85, isSupportVector: false },
+        { x: 0.28, y: 0.15, isSupportVector: false }, { x: 0.26, y: 0.4, isSupportVector: false }, { x: 0.24, y: 0.6, isSupportVector: false },
+        { x: 0.23, y: 0.75, isSupportVector: false },
         // Support vectors ON the right margin boundary
         { x: hardMarginRight, y: 0.3, isSupportVector: true },
         { x: hardMarginRight, y: 0.55, isSupportVector: true },
         { x: hardMarginRight, y: 0.8, isSupportVector: true },
       ];
-      
+
       const hardClass1 = [
-        { x: 0.65, y: 0.25 }, { x: 0.7, y: 0.35 }, { x: 0.68, y: 0.5 },
-        { x: 0.75, y: 0.6 }, { x: 0.72, y: 0.75 }, { x: 0.7, y: 0.9 },
-        { x: 0.78, y: 0.2 }, { x: 0.76, y: 0.45 }, { x: 0.74, y: 0.65 },
-        { x: 0.73, y: 0.8 },
-        // Support vectors ON the left margin boundary
-        { x: hardMarginLeft, y: 0.25, isSupportVector: true },
-        { x: hardMarginLeft, y: 0.5, isSupportVector: true },
-        { x: hardMarginLeft, y: 0.75, isSupportVector: true },
+        { x: 0.65, y: 0.25, isSupportVector: false }, { x: 0.7, y: 0.35, isSupportVector: false }, { x: 0.68, y: 0.5, isSupportVector: false },
+        { x: 0.75, y: 0.6, isSupportVector: false }, { x: 0.72, y: 0.75, isSupportVector: false }, { x: 0.7, y: 0.9, isSupportVector: false },
+        { x: 0.78, y: 0.2, isSupportVector: false }, { x: 0.76, y: 0.45, isSupportVector: false }, { x: 0.74, y: 0.65, isSupportVector: false },
       ];
 
-      return {
-        class0Points: hardClass0,
-        class1Points: hardClass1,
-        misclassifiedPoints: [],
-      };
-    } else {
-      // Soft margin: Support vectors ON the margin boundaries (at x ≈ 0.4571 and x ≈ 0.5429)
-      const softMarginLeft = 0.5 - 30 / 700; // ≈ 0.4571
-      const softMarginRight = 0.5 + 30 / 700; // ≈ 0.5429
-      
-      const softClass0 = [
-        { x: 0.15, y: 0.2 }, { x: 0.2, y: 0.3 }, { x: 0.18, y: 0.45 },
-        { x: 0.25, y: 0.55 }, { x: 0.22, y: 0.7 }, { x: 0.2, y: 0.85 },
-        { x: 0.28, y: 0.15 }, { x: 0.26, y: 0.4 }, { x: 0.24, y: 0.6 },
-        // Support vectors ON the right margin boundary
-        { x: softMarginRight, y: 0.3, isSupportVector: true },
-        { x: softMarginRight, y: 0.55, isSupportVector: true },
-        { x: softMarginRight, y: 0.8, isSupportVector: true },
-      ];
-      
-      const softClass1 = [
-        { x: 0.65, y: 0.25 }, { x: 0.7, y: 0.35 }, { x: 0.68, y: 0.5 },
-        { x: 0.75, y: 0.6 }, { x: 0.72, y: 0.75 }, { x: 0.7, y: 0.9 },
-        { x: 0.78, y: 0.2 }, { x: 0.76, y: 0.45 }, { x: 0.74, y: 0.65 },
-        // Support vectors ON the left margin boundary
-        { x: softMarginLeft, y: 0.25, isSupportVector: true },
-        { x: softMarginLeft, y: 0.5, isSupportVector: true },
-        { x: softMarginLeft, y: 0.75, isSupportVector: true },
-      ];
-
-      // Misclassified points (on wrong side) for soft margin
-      const misclassified = [
-        { x: 0.52, y: 0.4, class: 0 }, // Red point on green side
-        { x: 0.54, y: 0.6, class: 0 }, // Red point on green side
-        { x: 0.48, y: 0.3, class: 1 }, // Green point on red side
-        { x: 0.46, y: 0.7, class: 1 }, // Green point on red side
-      ];
-
-      return {
-        class0Points: softClass0,
-        class1Points: softClass1,
-        misclassifiedPoints: misclassified,
-      };
+      return { class0Points: hardClass0, class1Points: hardClass1, misclassifiedPoints: [] };
     }
+
+    // Soft margin: slightly closer margins and some misclassified points
+    const softMarginLeft = 0.4571;
+    const softMarginRight = 0.5429;
+
+    const softClass0 = [
+      { x: 0.15, y: 0.2, isSupportVector: false }, { x: 0.2, y: 0.35, isSupportVector: false }, { x: 0.18, y: 0.5, isSupportVector: false },
+      { x: 0.22, y: 0.65, isSupportVector: false }, { x: 0.25, y: 0.8, isSupportVector: false },
+      { x: softMarginRight, y: 0.5, isSupportVector: true },
+    ];
+
+    const softClass1 = [
+      { x: 0.75, y: 0.2, isSupportVector: false }, { x: 0.78, y: 0.35, isSupportVector: false }, { x: 0.8, y: 0.5, isSupportVector: false },
+      { x: 0.76, y: 0.65, isSupportVector: false }, { x: 0.85, y: 0.8, isSupportVector: false },
+      { x: softMarginLeft, y: 0.5, isSupportVector: true },
+    ];
+
+    // A couple of misclassified points for soft margin demo
+    const misclassified = [{ x: 0.52, y: 0.55, class: 0 }, { x: 0.48, y: 0.45, class: 1 }];
+
+    return { class0Points: softClass0, class1Points: softClass1, misclassifiedPoints: misclassified };
   }, [marginType]);
 
+  // Draw visualization when data or margin type changes
   useEffect(() => {
     drawVisualization();
   }, [marginType, class0Points, class1Points, misclassifiedPoints]);
@@ -725,37 +689,77 @@ const Parameters = () => {
             <div className="flex flex-col">
               {/* Visualization */}
               <Card className="p-8 w-full gradient-card hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-                {/* Toggle Button */}
-                <div className="flex-shrink-0 mb-6 flex gap-4 justify-center">
-                  <Button
-                    variant={marginType === "hard" ? "default" : "outline"}
-                    onClick={() => setMarginType("hard")}
-                    className="px-6"
-                  >
-                    Hard Margin
-                  </Button>
-                  <Button
-                    variant={marginType === "soft" ? "default" : "outline"}
-                    onClick={() => setMarginType("soft")}
-                    className="px-6"
-                  >
-                    Soft Margin
-                  </Button>
-                </div>
+                {/* Plot container with integrated Controls and Legend (in-flow header) */}
+                <div className="pt-4">
+                  <div className="mb-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                      {/* Controls box (left) */}
+                      <div className="flex-shrink-0">
+                        <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-border shadow-sm">
+                          <div className="text-sm font-semibold mb-2">Controls</div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant={marginType === "hard" ? "default" : "outline"}
+                              onClick={() => setMarginType("hard")}
+                              size="sm"
+                            >
+                              Hard
+                            </Button>
+                            <Button
+                              variant={marginType === "soft" ? "default" : "outline"}
+                              onClick={() => setMarginType("soft")}
+                              size="sm"
+                            >
+                              Soft
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
 
-                <div className="flex-shrink-0 mb-4">
-                  <h3 className="text-lg font-semibold text-center mb-2">
-                    {marginType === "hard" ? "Hard Margin Visualization" : "Soft Margin Visualization"}
-                  </h3>
-                </div>
-                
-                <div className="flex-shrink-0">
-                  <canvas
-                    ref={canvasRef}
-                    width={800}
-                    height={500}
-                    className="w-full h-auto rounded-lg border-2 border-border shadow-lg bg-white"
-                  />
+                      {/* Legend box (right) */}
+                      <div className="flex-shrink-0">
+                        <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-border shadow-sm">
+                          <div className="text-sm font-semibold mb-2">Legend</div>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                              <span className="text-muted-foreground">Class 0</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                              <span className="text-muted-foreground">Class 1</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-amber-500 rounded-full"></div>
+                              <span className="text-muted-foreground">Support Vectors</span>
+                            </div>
+                            {marginType === "soft" && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-red-500 border-dashed rounded-full"></div>
+                                <span className="text-muted-foreground">Misclassified</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="px-0">
+                    <div className="flex-shrink-0 mb-4">
+                      <h3 className="text-lg font-semibold text-center mb-2">
+                        {marginType === "hard" ? "Hard Margin Visualization" : "Soft Margin Visualization"}
+                      </h3>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <canvas
+                        ref={canvasRef}
+                        width={800}
+                        height={560}
+                        className="w-full h-auto rounded-lg border-2 border-border shadow-lg bg-white"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Explanation */}
@@ -792,28 +796,6 @@ const Parameters = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Key Elements Legend */}
-                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                    <span className="text-muted-foreground">Class 0 (Red)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                    <span className="text-muted-foreground">Class 1 (Green)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-amber-500 rounded-full"></div>
-                    <span className="text-muted-foreground">Support Vectors</span>
-                  </div>
-                  {marginType === "soft" && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-red-500 border-dashed rounded-full"></div>
-                      <span className="text-muted-foreground">Misclassified</span>
-                    </div>
-                  )}
-                </div>
               </Card>
             </div>
           </div>
@@ -821,9 +803,9 @@ const Parameters = () => {
       </section>
 
       {/* Section 2: Support Vectors */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section className="pt-4 pb-8 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold mb-8 text-center">Support Vectors: The VIP Data Points</h2>
+          <h2 className="text-4xl font-bold mb-4 text-center">Support Vectors: The VIP Data Points</h2>
 
           {/* Text Card and Visualization - Side by Side */}
           <div className="grid lg:grid-cols-2 gap-6 mb-8 items-stretch">
@@ -833,9 +815,26 @@ const Parameters = () => {
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   Support vectors are the data points closest to the decision boundary. They are like pillars holding up a fence—only these critical points determine where the boundary is drawn.
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed mb-6">
                   <strong className="text-foreground">Key insight:</strong> All other data points could be removed without changing the boundary. Only support vectors matter!
                 </p>
+                
+                <div className="space-y-6 mt-4 border-t pt-6">
+                  <div>
+                    <h4 className="text-lg font-semibold mb-2">Why Important?</h4>
+                    <p className="text-muted-foreground">They define the entire decision boundary</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-lg font-semibold mb-2">How Many?</h4>
+                    <p className="text-muted-foreground">Usually just a small subset of all data</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-lg font-semibold mb-2">What Makes Them Special?</h4>
+                    <p className="text-muted-foreground">Closest points to the boundary</p>
+                  </div>
+                </div>
               </Card>
             </div>
 
@@ -876,21 +875,6 @@ const Parameters = () => {
             </div>
           </div>
 
-          {/* Three Mini Info Boxes - Centered Below */}
-          <div className="flex justify-center">
-            <div className="grid sm:grid-cols-3 gap-4 max-w-3xl w-full">
-              {[
-                { title: "Why Important?", text: "They define the entire decision boundary" },
-                { title: "How Many?", text: "Usually just a small subset of all data" },
-                { title: "What Makes Them Special?", text: "Closest points to the boundary" },
-              ].map((item, index) => (
-                <Card key={index} className="p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                  <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
-                  <p className="text-xs text-muted-foreground">{item.text}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 

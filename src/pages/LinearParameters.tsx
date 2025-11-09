@@ -18,10 +18,6 @@ const LinearParameters = () => {
   const [prediction, setPrediction] = useState<string | null>(null);
   const [fixedSV, setFixedSV] = useState<{ sv0: any[]; sv1: any[] } | null>(null);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   // Only set number of support vectors per class
   useEffect(() => {
     switch (cParameter) {
@@ -390,86 +386,93 @@ const LinearParameters = () => {
         </div>
       </section>
 
-      {/* Understanding the Result */}
+      {/* Combined Summary: Understanding / Advantages / Limitations */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Understanding the Result</h2>
-          <div className="space-y-3">
-            <Card className="p-4 bg-primary/5">
-              <p className="text-sm">
-                <strong>Decision Boundary:</strong> The line separating approved from rejected applications. Your input values are compared against this boundary.
-              </p>
-            </Card>
-            <Card className="p-4 bg-warning/5">
-              <p className="text-sm">
-                <strong>Margin:</strong> Confidence zone—wider margin (low C) means more confident decisions, narrower margin (high C) means stricter classification.
-              </p>
-            </Card>
-            {/* New: What are parameters (simple words) */}
-            <Card className="p-4 bg-accent/10">
-              <p className="text-sm">
-                <strong>What are parameters?</strong> They’re simple settings that change how the model behaves. Like turning the volume on a TV—turning the <em>C</em> knob makes the model more or less strict about drawing the line and margins.
-              </p>
-            </Card>
-            <Card className="p-4 bg-success/5">
-              <p className="text-sm">
-                <strong>Support Vectors:</strong> Edge cases—applicants right on the approval threshold. These define where the boundary is drawn.
-              </p>
-            </Card>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            {/* Understanding the Result column */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Understanding the Result</h2>
+              <div className="space-y-3">
+                <Card className="p-4 bg-primary/5">
+                  <p className="text-sm">
+                    <strong>Decision Boundary:</strong> The line separating approved from rejected applications. Your input values are compared against this boundary.
+                  </p>
+                </Card>
+                <Card className="p-4 bg-warning/5">
+                  <p className="text-sm">
+                    <strong>Margin:</strong> Confidence zone—wider margin (low C) means more confident decisions, narrower margin (high C) means stricter classification.
+                  </p>
+                </Card>
+                <Card className="p-4 bg-accent/10">
+                  <p className="text-sm">
+                    <strong>What are parameters?</strong> They’re simple settings that change how the model behaves. Like turning the volume on a TV—turning the <em>C</em> knob makes the model more or less strict about drawing the line and margins.
+                  </p>
+                </Card>
+                <Card className="p-4 bg-success/5">
+                  <p className="text-sm">
+                    <strong>Support Vectors:</strong> Edge cases—applicants right on the approval threshold. These define where the boundary is drawn.
+                  </p>
+                </Card>
+              </div>
+            </div>
+
+            {/* Advantages column */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Advantages</h2>
+              <Card className="p-8 gradient-card">
+                <h3 className="text-2xl font-semibold mb-6 text-success">✓ Advantages</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-2">
+                    <span className="text-success font-bold">•</span>
+                    <span className="text-base">Simple and fast to use—like drawing the straightest possible line to separate two kinds of things.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-success font-bold">•</span>
+                    <span className="text-base">Easy to understand what the computer is doing—just seeing which side of a line something lands on.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-success font-bold">•</span>
+                    <span className="text-base">Works well when there is a clear difference between the groups (no need for complicated rules).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-success font-bold">•</span>
+                    <span className="text-base">You only have to adjust one 'strictness' setting (the C parameter).</span>
+                  </li>
+                </ul>
+              </Card>
+            </div>
+
+            {/* Limitations column */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Limitations</h2>
+              <Card className="p-8 gradient-card">
+                <h3 className="text-2xl font-semibold mb-6 text-warning">⚠ Limitations</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-2">
+                    <span className="text-warning font-bold">•</span>
+                    <span className="text-base">Can only draw straight lines—if the real difference is wiggly or curved, it won’t work well.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-warning font-bold">•</span>
+                    <span className="text-base">Not great when the groups are mixed up or overlapping—a straight line might get confused.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-warning font-bold">•</span>
+                    <span className="text-base">Can be tricked by unusual or extreme examples (outliers).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-warning font-bold">•</span>
+                    <span className="text-base">Needs the data to be measured in similar ways (like apples-to-apples), or it can struggle to draw the line.</span>
+                  </li>
+                </ul>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Navigation Footer */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Advantages & Limitations</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="p-8 gradient-card">
-              <h3 className="text-2xl font-semibold mb-6 text-success">✓ Advantages</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <span className="text-success font-bold">•</span>
-                  <span className="text-base">Simple and fast to use—like drawing the straightest possible line to separate two kinds of things.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-success font-bold">•</span>
-                  <span className="text-base">Easy to understand what the computer is doing—just seeing which side of a line something lands on.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-success font-bold">•</span>
-                  <span className="text-base">Works well when there is a clear difference between the groups (no need for complicated rules).</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-success font-bold">•</span>
-                  <span className="text-base">You only have to adjust one 'strictness' setting (the C parameter).</span>
-                </li>
-              </ul>
-            </Card>
-            <Card className="p-8 gradient-card">
-              <h3 className="text-2xl font-semibold mb-6 text-warning">⚠ Limitations</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <span className="text-warning font-bold">•</span>
-                  <span className="text-base">Can only draw straight lines—if the real difference is wiggly or curved, it won’t work well.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-warning font-bold">•</span>
-                  <span className="text-base">Not great when the groups are mixed up or overlapping—a straight line might get confused.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-warning font-bold">•</span>
-                  <span className="text-base">Can be tricked by unusual or extreme examples (outliers).</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-warning font-bold">•</span>
-                  <span className="text-base">Needs the data to be measured in similar ways (like apples-to-apples), or it can struggle to draw the line.</span>
-                </li>
-              </ul>
-            </Card>
-          </div>
-        </div>
-      </section>
+      {/* Removed duplicate summary section (bottom row) to avoid repeating content. */}
 
       {/* Let's take you to a new kernel type! */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
