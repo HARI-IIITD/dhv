@@ -12,27 +12,38 @@ const Parameters = () => {
   const [removedSVIndex, setRemovedSVIndex] = useState<number | null>(null);
   const animationStartTimeRef = useRef<number | null>(null);
 
-  // Generate fixed data points with support vectors ON the margin boundaries
+  // Generate fixed data points with support vectors exactly on margin boundaries
   const { class0Points, class1Points, misclassifiedPoints } = useMemo(() => {
     // Hard margin vs soft margin placements (normalized coordinates)
     if (marginType === "hard") {
-      const hardMarginRight = 0.5714;
+      // Define margin boundaries - symmetric around 0.5
+      const hardMarginLeft = 0.4286;  // Left margin at 42.86%
+      const hardMarginRight = 0.5714; // Right margin at 57.14%
 
       const hardClass0 = [
-        { x: 0.15, y: 0.2, isSupportVector: false }, { x: 0.2, y: 0.3, isSupportVector: false }, { x: 0.18, y: 0.45, isSupportVector: false },
-        { x: 0.25, y: 0.55, isSupportVector: false }, { x: 0.22, y: 0.7, isSupportVector: false }, { x: 0.2, y: 0.85, isSupportVector: false },
-        { x: 0.28, y: 0.15, isSupportVector: false }, { x: 0.26, y: 0.4, isSupportVector: false }, { x: 0.24, y: 0.6, isSupportVector: false },
-        { x: 0.23, y: 0.75, isSupportVector: false },
-        // Support vectors ON the right margin boundary
-        { x: hardMarginRight, y: 0.3, isSupportVector: true },
-        { x: hardMarginRight, y: 0.55, isSupportVector: true },
-        { x: hardMarginRight, y: 0.8, isSupportVector: true },
+        // Regular points well within the left side
+        { x: 0.15, y: 0.2, isSupportVector: false }, 
+        { x: 0.2, y: 0.3, isSupportVector: false }, 
+        { x: 0.18, y: 0.45, isSupportVector: false },
+        { x: 0.25, y: 0.55, isSupportVector: false },
+        { x: 0.3, y: 0.4, isSupportVector: false },
+        // Support vectors exactly on the left margin boundary
+        { x: hardMarginLeft, y: 0.3, isSupportVector: true },
+        { x: hardMarginLeft, y: 0.6, isSupportVector: true },
+        { x: hardMarginLeft, y: 0.8, isSupportVector: true },
       ];
 
       const hardClass1 = [
-        { x: 0.65, y: 0.25, isSupportVector: false }, { x: 0.7, y: 0.35, isSupportVector: false }, { x: 0.68, y: 0.5, isSupportVector: false },
-        { x: 0.75, y: 0.6, isSupportVector: false }, { x: 0.72, y: 0.75, isSupportVector: false }, { x: 0.7, y: 0.9, isSupportVector: false },
-        { x: 0.78, y: 0.2, isSupportVector: false }, { x: 0.76, y: 0.45, isSupportVector: false }, { x: 0.74, y: 0.65, isSupportVector: false },
+        // Regular points well within the right side
+        { x: 0.7, y: 0.35, isSupportVector: false },
+        { x: 0.75, y: 0.6, isSupportVector: false },
+        { x: 0.72, y: 0.75, isSupportVector: false },
+        { x: 0.78, y: 0.2, isSupportVector: false },
+        { x: 0.76, y: 0.45, isSupportVector: false },
+        // Support vectors exactly on the right margin boundary
+        { x: hardMarginRight, y: 0.3, isSupportVector: true },
+        { x: hardMarginRight, y: 0.6, isSupportVector: true },
+        { x: hardMarginRight, y: 0.8, isSupportVector: true },
       ];
 
       return { class0Points: hardClass0, class1Points: hardClass1, misclassifiedPoints: [] };
@@ -54,8 +65,8 @@ const Parameters = () => {
       { x: softMarginLeft, y: 0.5, isSupportVector: true },
     ];
 
-    // A couple of misclassified points for soft margin demo
-    const misclassified = [{ x: 0.52, y: 0.55, class: 0 }, { x: 0.48, y: 0.45, class: 1 }];
+    // A couple of misclassified points for soft margin demo - swapped classes
+    const misclassified = [{ x: 0.52, y: 0.55, class: 1 }, { x: 0.48, y: 0.45, class: 0 }];
 
     return { class0Points: softClass0, class1Points: softClass1, misclassifiedPoints: misclassified };
   }, [marginType]);
@@ -343,33 +354,62 @@ const Parameters = () => {
       }
     }
 
-    // Draw legend
+        // Draw legend box in top-right
+    const legendX = width - padding - 160;
+    const legendY = padding + 10;
+    const legendWidth = 150;
+    const legendHeight = marginType === "soft" ? 100 : 80;
+    
+    // Legend background
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.strokeStyle = "#E5E7EB";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(legendX, legendY, legendWidth, legendHeight, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    // Legend title
     ctx.fillStyle = "#374151";
     ctx.font = "bold 12px sans-serif";
-    ctx.textAlign = "left";
-    
+    ctx.fillText("Legend", legendX + 10, legendY + 20);
+    ctx.font = "12px sans-serif";
+
+    // Class 0 (Red)
     ctx.fillStyle = "#EF4444";
     ctx.beginPath();
-    ctx.arc(padding + 10, padding + 20, 4, 0, Math.PI * 2);
+    ctx.arc(legendX + 15, legendY + 35, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#374151";
-    ctx.font = "11px sans-serif";
-    ctx.fillText("Class 0", padding + 18, padding + 24);
+    ctx.fillText("Class 0", legendX + 25, legendY + 38);
 
+    // Class 1 (Green)
     ctx.fillStyle = "#10B981";
     ctx.beginPath();
-    ctx.arc(padding + 70, padding + 20, 4, 0, Math.PI * 2);
+    ctx.arc(legendX + 15, legendY + 55, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#374151";
-    ctx.fillText("Class 1", padding + 78, padding + 24);
+    ctx.fillText("Class 1", legendX + 25, legendY + 58);
 
-    if (animationState !== "idle") {
-      ctx.strokeStyle = "#F59E0B";
-      ctx.lineWidth = 2;
+    // Support Vectors
+    ctx.strokeStyle = "#F59E0B";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(legendX + 15, legendY + 75, 4, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = "#374151";
+    ctx.fillText("Support Vectors", legendX + 25, legendY + 78);
+
+    // Misclassified (only for soft margin)
+    if (marginType === "soft") {
+      ctx.strokeStyle = "#DC2626";
+      ctx.setLineDash([2, 2]);
       ctx.beginPath();
-      ctx.arc(padding + 130, padding + 20, 8, 0, Math.PI * 2);
+      ctx.arc(legendX + 15, legendY + 95, 4, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.fillText("Support Vectors", padding + 145, padding + 24);
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#374151";
+      ctx.fillText("Misclassified", legendX + 25, legendY + 98);
     }
   };
 
@@ -441,21 +481,28 @@ const Parameters = () => {
     ctx.fillStyle = gradient2;
     ctx.fillRect(width / 2, padding, (width - 2 * padding) / 2, height - 2 * padding);
 
-    // Calculate margin width
-    const marginWidth = marginType === "hard" ? 50 : 30;
+    // Calculate margin width and boundaries
+    const effectiveWidth = width - 2 * padding;
+    const marginWidth = marginType === "hard" ? effectiveWidth * 0.0714 : effectiveWidth * 0.0429; // 7.14% for hard, 4.29% for soft
     const boundaryX = width / 2;
 
-    // Draw margin boundaries (dashed lines)
+    // Draw margin boundaries (dashed lines) - symmetric around decision boundary
     ctx.strokeStyle = marginType === "hard" ? "#3B82F6" : "#F59E0B";
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 4]);
+    
+    // Left margin
+    const leftMarginX = boundaryX - marginWidth;
     ctx.beginPath();
-    ctx.moveTo(boundaryX - marginWidth, padding);
-    ctx.lineTo(boundaryX - marginWidth, height - padding);
+    ctx.moveTo(leftMarginX, padding);
+    ctx.lineTo(leftMarginX, height - padding);
     ctx.stroke();
+    
+    // Right margin
+    const rightMarginX = boundaryX + marginWidth;
     ctx.beginPath();
-    ctx.moveTo(boundaryX + marginWidth, padding);
-    ctx.lineTo(boundaryX + marginWidth, height - padding);
+    ctx.moveTo(rightMarginX, padding);
+    ctx.lineTo(rightMarginX, height - padding);
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -528,74 +575,159 @@ const Parameters = () => {
       ctx.stroke();
     });
 
-    // Draw Support Vectors - points that lie ON the margin boundaries
-    // First, highlight them with amber circles
+    // Draw Support Vectors with enhanced visibility and margin connection lines
     [...class0Points, ...class1Points].forEach((point) => {
       if (!point.isSupportVector) return;
       
       const x = padding + point.x * (width - 2 * padding);
       const y = padding + (1 - point.y) * (height - 2 * padding);
       
-      // Check if this is a Class 0 point by checking if it's in class0Points array
-      const isClass0 = class0Points.some(p => p.x === point.x && p.y === point.y && p.isSupportVector === point.isSupportVector);
+      // Check if this is a Class 0 point
+      const isClass0 = class0Points.some(p => p.x === point.x && p.y === point.y);
       
-      // Draw amber circle highlight
-      ctx.strokeStyle = "#F59E0B";
+      // Connect support vector to its margin with dotted line
+      ctx.strokeStyle = marginType === "hard" ? "#3B82F6" : "#F59E0B";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(width/2 + (isClass0 ? -marginWidth : marginWidth), y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Outer highlight circle
+      ctx.strokeStyle = marginType === "hard" ? "#3B82F6" : "#F59E0B";
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(x, y, 12, 0, Math.PI * 2);
       ctx.stroke();
       
-      // Draw the actual point
-      ctx.fillStyle = isClass0 ? "#EF4444" : "#10B981";
+      // White halo for contrast
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(x, y, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = isClass0 ? "#DC2626" : "#059669";
-      ctx.lineWidth = 2;
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
       ctx.stroke();
+      
+      // Draw the actual point with swapped colors for soft margin support vectors
+      if (marginType === "soft" && point.isSupportVector) {
+        // Swap colors for support vectors in soft margin case
+        ctx.fillStyle = isClass0 ? "#10B981" : "#EF4444"; // Opposite of normal
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Point border also swapped
+        ctx.strokeStyle = isClass0 ? "#059669" : "#DC2626";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        // Normal coloring for hard margin or non-support vectors
+        ctx.fillStyle = isClass0 ? "#EF4444" : "#10B981";
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Point border
+        ctx.strokeStyle = isClass0 ? "#DC2626" : "#059669";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
     });
 
-    // Draw legend
-    ctx.fillStyle = "#374151";
-    ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "left";
+    // Draw integrated legend box in top-right
+    const legendX = width - padding - 180;
+    const legendY = padding + 10;
+    const legendWidth = 160;
+    const legendHeight = marginType === "soft" ? 120 : 95;
     
-    // Class labels
-    ctx.fillStyle = "#EF4444";
+    // Semi-transparent white background with border
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+    ctx.strokeStyle = "#E5E7EB";
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(padding + 10, padding + 20, 5, 0, Math.PI * 2);
+    ctx.roundRect(legendX, legendY, legendWidth, legendHeight, 8);
     ctx.fill();
-    ctx.fillStyle = "#374151";
-    ctx.font = "12px sans-serif";
-    ctx.fillText("Class 0", padding + 20, padding + 24);
-
-    ctx.fillStyle = "#10B981";
-    ctx.beginPath();
-    ctx.arc(padding + 80, padding + 20, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#374151";
-    ctx.fillText("Class 1", padding + 90, padding + 24);
-
-    // Support vector label
-    ctx.strokeStyle = "#F59E0B";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(padding + 150, padding + 20, 8, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.fillText("Support Vectors", padding + 165, padding + 24);
 
-    // Misclassified label (only for soft margin)
+    // Legend title
+    ctx.fillStyle = "#374151";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Legend", legendX + 12, legendY + 25);
+    
+    const drawLegendItem = (y: number, color: string, label: string, type: 'fill' | 'stroke' | 'support' | 'misclassified' = 'fill') => {
+      const x = legendX + 12;
+      
+      if (type === 'support') {
+        // Support vector indicator
+        ctx.strokeStyle = marginType === "hard" ? "#3B82F6" : "#F59E0B";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + 6, y, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // White halo
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + 6, y, 5, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Center point - for legend show both colors side by side
+        if (marginType === "soft") {
+          // Split circle to show both colors in legend for soft margin
+          ctx.fillStyle = "#EF4444";
+          ctx.beginPath();
+          ctx.arc(x + 6, y, 4, Math.PI/2, 3*Math.PI/2, false);
+          ctx.fill();
+          
+          ctx.fillStyle = "#10B981";
+          ctx.beginPath();
+          ctx.arc(x + 6, y, 4, -Math.PI/2, Math.PI/2, false);
+          ctx.fill();
+        } else {
+          // Normal single color for hard margin
+          ctx.fillStyle = "#10B981";
+          ctx.beginPath();
+          ctx.arc(x + 6, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (type === 'misclassified') {
+        // X mark for misclassified points
+        ctx.strokeStyle = "#DC2626";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + 2, y - 4);
+        ctx.lineTo(x + 10, y + 4);
+        ctx.moveTo(x + 2, y + 4);
+        ctx.lineTo(x + 10, y - 4);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x + 6, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        if (type === 'stroke') {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+      
+      // Label text
+      ctx.fillStyle = "#374151";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(label, x + 18, y + 4);
+    };
+
+    // Draw legend items
+    drawLegendItem(legendY + 45, "#EF4444", "Class 0", 'fill');
+    drawLegendItem(legendY + 65, "#10B981", "Class 1", 'fill');
+    drawLegendItem(legendY + 85, "#F59E0B", "Support Vectors", 'support');
     if (marginType === "soft") {
-      ctx.strokeStyle = "#DC2626";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(padding + 260, padding + 15);
-      ctx.lineTo(padding + 268, padding + 23);
-      ctx.moveTo(padding + 260, padding + 23);
-      ctx.lineTo(padding + 268, padding + 15);
-      ctx.stroke();
-      ctx.fillText("Misclassified", padding + 275, padding + 24);
+      drawLegendItem(legendY + 105, "#DC2626", "Misclassified", 'misclassified');
     }
 
     // Margin label

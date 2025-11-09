@@ -21,7 +21,6 @@ const RBFKernel = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gamma, setGamma] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
-  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Animation refs/state for canvas-driven animations
   const clustersRef = useRef<Array<{cx:number;cy:number;radius:number}>>([]);
@@ -30,7 +29,6 @@ const RBFKernel = () => {
   const clusterScaleRef = useRef<number>(0); // 0..1 animated scale for final regions
   const candidateScaleRef = useRef<number>(0); // for candidate circles in step 2
   const rafRef = useRef<number | null>(null);
-  const [stepEnter, setStepEnter] = useState(true);
 
   useEffect(() => { drawVisualization(); }, [gamma, currentStep]);
 
@@ -48,14 +46,30 @@ const RBFKernel = () => {
     // Create a reproducible pseudo-random sequence using simple LCG so animation is stable across frames
     let seed = 42;
     const rand = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return (seed / 4294967296); };
-    for (let i = 0; i < 30; i++) {
+    
+    // Try to generate points with a minimum safe distance from any cluster
+    const attempts = 100; // Maximum attempts to find valid points
+    const safeDistance = 1.3; // Increased safety margin from clusters
+    let validPoints = 0;
+    
+    while (validPoints < 25 && attempts > 0) { // Reduced number of points for less crowding
       const p = { x: rand(), y: rand() };
-      let inCluster = false;
+      let tooClose = false;
+      
+      // Check distance from all clusters with increased safety margin
       for (const c of clusters) {
         const d = Math.hypot(p.x - c.cx, p.y - c.cy);
-        if (d < c.radius * 0.9) { inCluster = true; break; }
+        if (d < c.radius * safeDistance) {
+          tooClose = true;
+          break;
+        }
       }
-      if (!inCluster) lowInterestPoints.push(p);
+      
+      // Only add points that are safely away from clusters
+      if (!tooClose) {
+        lowInterestPoints.push(p);
+        validPoints++;
+      }
     }
     pointsRef.current = lowInterestPoints;
     // start animated points at their initial positions
@@ -65,23 +79,9 @@ const RBFKernel = () => {
     candidateScaleRef.current = currentStep === 2 ? 1 : 0;
   }, []);
 
-  // Animate step content (fade + slide) and trigger canvas morph animation
+  // Update visualization when step changes
   useEffect(() => {
-    // content enter animation
-    if (prefersReducedMotion) {
-      setStepEnter(true);
-    } else {
-      setStepEnter(false);
-      // quick next tick to trigger CSS transition
-      requestAnimationFrame(() => setStepEnter(true));
-    }
-
-    // Trigger canvas animations for points and regions
-    let start: number | null = null;
-    const duration = prefersReducedMotion ? 0 : 500; // ms
-    const stagger = 25; // ms per point
-
-    // Determine animation targets
+    // Determine targets based on current step
     const targetClusterScale = currentStep >= 3 ? 1 : 0;
     const targetCandidateScale = currentStep === 2 ? 1 : 0;
 
@@ -102,53 +102,13 @@ const RBFKernel = () => {
       return { x: p.x, y: p.y };
     });
 
-    // Cancel existing RAF
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    // Update immediately without animation
+    clusterScaleRef.current = targetClusterScale;
+    candidateScaleRef.current = targetCandidateScale;
+    animatedPointsRef.current = targets.map(t => ({ x: t.x, y: t.y }));
+    drawVisualization();
 
-    const stepAnimate = (ts: number) => {
-      if (!start) start = ts;
-      const elapsed = ts - start;
-      const t = duration === 0 ? 1 : Math.min(1, elapsed / duration);
-
-      // animate cluster/candidate scales
-      clusterScaleRef.current = clusterScaleRef.current + (targetClusterScale - clusterScaleRef.current) * (prefersReducedMotion ? 1 : t);
-      candidateScaleRef.current = candidateScaleRef.current + (targetCandidateScale - candidateScaleRef.current) * (prefersReducedMotion ? 1 : t);
-
-      // animate points with per-point stagger
-      animatedPointsRef.current = pointsRef.current.map((p, idx) => {
-        const delay = (idx % 10) * stagger; // stagger groups of 10
-        const localT = duration === 0 ? 1 : Math.max(0, Math.min(1, (elapsed - delay) / duration));
-        const sx = p.x + (targets[idx].x - p.x) * localT;
-        const sy = p.y + (targets[idx].y - p.y) * localT;
-        return { x: sx, y: sy };
-      });
-
-      drawVisualization();
-
-      if (elapsed < duration + pointsRef.current.length * stagger) {
-        rafRef.current = requestAnimationFrame(stepAnimate);
-      } else {
-        // ensure final values
-        clusterScaleRef.current = targetClusterScale;
-        candidateScaleRef.current = targetCandidateScale;
-        animatedPointsRef.current = targets.map(t => ({ x: t.x, y: t.y }));
-        drawVisualization();
-        rafRef.current = null;
-      }
-    };
-
-    // Start animation (or immediately set targets if reduced-motion)
-    if (prefersReducedMotion) {
-      clusterScaleRef.current = targetClusterScale;
-      candidateScaleRef.current = targetCandidateScale;
-      animatedPointsRef.current = targets.map(t => ({ x: t.x, y: t.y }));
-      drawVisualization();
-    } else {
-      rafRef.current = requestAnimationFrame(stepAnimate);
-    }
-
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); rafRef.current = null; };
-  }, [currentStep, prefersReducedMotion]);
+  }, [currentStep]);
 
   const drawVisualization = () => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -295,13 +255,7 @@ const RBFKernel = () => {
                   <Button key={step} variant={currentStep===step?"default":"outline"} onClick={()=>setCurrentStep(step)} size="sm">Step {step}</Button>
                 ))}
               </div>
-              <div
-                className={
-                  `mt-2 mb-6 p-4 bg-muted/30 rounded-lg ${prefersReducedMotion ? "" : "transition-transform transition-opacity duration-300 ease-out transform"} ` +
-                  (stepEnter ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3")
-                }
-                aria-live="polite"
-              >
+              <div className="mt-2 mb-6 p-4 bg-muted/30 rounded-lg" aria-live="polite">
                 <p className="text-2xl font-semibold mb-2">Step {currentStep}: {steps[currentStep-1].label}</p>
                 <p className="text-lg text-muted-foreground">{steps[currentStep-1].detail}</p>
               </div>
